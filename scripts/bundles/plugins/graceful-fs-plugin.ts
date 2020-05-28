@@ -6,7 +6,7 @@ export function gracefulFsPlugin(): Plugin {
     resolveId(id) {
       if (id === 'graceful-fs') {
         return {
-          id: '../sys/node/graceful-fs.js',
+          id: '../../sys/node/graceful-fs.js',
           external: true,
         };
       }

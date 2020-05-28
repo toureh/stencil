@@ -27,7 +27,8 @@ export function getOptions(rootDir: string, inputOpts: BuildOptions = {}) {
     scriptsBundlesDir,
     bundleHelpersDir,
     output: {
-      cliDir: join(rootDir, 'cli'),
+      cliDenoDir: join(rootDir, 'cli', 'deno'),
+      cliNodeDir: join(rootDir, 'cli', 'node'),
       compilerDir: join(rootDir, 'compiler'),
       devServerDir: join(rootDir, 'dev-server'),
       internalDir: join(rootDir, 'internal'),
@@ -121,7 +122,8 @@ export interface BuildOptions {
   bundleHelpersDir?: string;
 
   output?: {
-    cliDir: string;
+    cliDenoDir: string;
+    cliNodeDir: string;
     compilerDir: string;
     devServerDir: string;
     internalDir: string;

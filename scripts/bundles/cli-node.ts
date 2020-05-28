@@ -9,18 +9,18 @@ import { writePkgJson } from '../utils/write-pkg-json';
 import { BuildOptions } from '../utils/options';
 import { RollupOptions } from 'rollup';
 
-export async function cli(opts: BuildOptions) {
-  const inputDir = join(opts.transpiledDir, 'cli');
+export async function cliNode(opts: BuildOptions) {
+  const inputDir = join(opts.transpiledDir, 'sys', 'node', 'cli');
 
   // create public d.ts
   let dts = await fs.readFile(join(inputDir, 'public.d.ts'), 'utf8');
   dts = dts.replace('@stencil/core/internal', '../internal/index');
-  await fs.writeFile(join(opts.output.cliDir, 'index.d.ts'), dts);
+  await fs.writeFile(join(opts.output.cliNodeDir, 'index.d.ts'), dts);
 
   // write package.json
-  writePkgJson(opts, opts.output.cliDir, {
-    name: '@stencil/core/cli',
-    description: 'Stencil CLI.',
+  writePkgJson(opts, opts.output.cliNodeDir, {
+    name: '@stencil/core/cli/node',
+    description: 'Stencil Node CLI.',
     main: 'index.js',
     types: 'index.d.ts',
   });
@@ -49,7 +49,7 @@ export async function cli(opts: BuildOptions) {
     input: join(inputDir, 'index.js'),
     output: {
       format: 'cjs',
-      file: join(opts.output.cliDir, 'index.js'),
+      file: join(opts.output.cliNodeDir, 'index.js'),
       esModule: false,
       preferConst: true,
     },
@@ -60,19 +60,19 @@ export async function cli(opts: BuildOptions) {
         resolveId(importee) {
           if (importee === '@stencil/core/compiler') {
             return {
-              id: '../compiler/stencil.js',
+              id: '../../compiler/stencil.js',
               external: true,
             };
           }
           if (importee === '@stencil/core/dev-server') {
             return {
-              id: '../dev-server/index.js',
+              id: '../../dev-server/index.js',
               external: true,
             };
           }
           if (importee === '@stencil/core/mock-doc') {
             return {
-              id: '../mock-doc/index.js',
+              id: '../../mock-doc/index.js',
               external: true,
             };
           }
@@ -93,7 +93,7 @@ export async function cli(opts: BuildOptions) {
     input: join(inputDir, 'worker', 'index.js'),
     output: {
       format: 'cjs',
-      file: join(opts.output.cliDir, 'cli-worker.js'),
+      file: join(opts.output.cliNodeDir, 'cli-worker.js'),
       esModule: false,
       preferConst: true,
     },
@@ -104,13 +104,13 @@ export async function cli(opts: BuildOptions) {
         resolveId(importee) {
           if (importee === '@stencil/core/compiler') {
             return {
-              id: '../compiler/stencil.js',
+              id: '../../compiler/stencil.js',
               external: true,
             };
           }
           if (importee === '@stencil/core/mock-doc') {
             return {
-              id: '../mock-doc/index.js',
+              id: '../../mock-doc/index.js',
               external: true,
             };
           }

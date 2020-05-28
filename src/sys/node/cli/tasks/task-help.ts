@@ -1,4 +1,4 @@
-import * as d from '../../declarations';
+import * as d from '../../../../declarations';
 
 export function taskHelp(prcs: NodeJS.Process, config: d.Config) {
   const logger = config.logger;

@@ -1,4 +1,4 @@
-import * as d from '../../declarations';
+import * as d from '../../../../declarations';
 import type { Testing } from '@stencil/core/testing';
 import exit from 'exit';
 import { startupLog } from './startup-log';

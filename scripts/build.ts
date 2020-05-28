@@ -1,5 +1,5 @@
 import { BuildOptions } from './utils/options';
-import { cli } from './bundles/cli';
+import { cliNode } from './bundles/cli-node';
 import { compiler } from './bundles/compiler';
 import { createLicense } from './license';
 import { devServer } from './bundles/dev-server';
@@ -34,7 +34,7 @@ export async function run(rootDir: string, args: string[]) {
 
 export async function createBuild(opts: BuildOptions) {
   await Promise.all([
-    emptyDir(opts.output.cliDir),
+    emptyDir(opts.output.cliNodeDir),
     emptyDir(opts.output.compilerDir),
     emptyDir(opts.output.devServerDir),
     emptyDir(opts.output.internalDir),
@@ -46,8 +46,7 @@ export async function createBuild(opts: BuildOptions) {
   await sysNode(opts);
 
   const bundles = await Promise.all([
-    //
-    cli(opts),
+    cliNode(opts),
     compiler(opts),
     devServer(opts),
     internal(opts),

@@ -1,4 +1,4 @@
-import { ConfigFlags } from '../declarations';
+import { ConfigFlags } from '../../../declarations';
 import { dashToPascalCase } from '@utils';
 
 export function parseFlags(args: string[]): ConfigFlags {

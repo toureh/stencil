@@ -1,4 +1,4 @@
-import { Config, TaskCommand } from '../../declarations';
+import { Config, TaskCommand } from '../../../../declarations';
 import { taskBuild } from './task-build';
 import { taskDocs } from './task-docs';
 import { taskGenerate } from './task-generate';

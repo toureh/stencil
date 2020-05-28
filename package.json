@@ -5,7 +5,7 @@
   "main": "internal/stencil-core.js",
   "types": "internal/stencil-core.d.ts",
   "bin": {
-    "stencil": "bin/stencil"
+    "stencil": "bin/stencil-node"
   },
   "files": [
     "bin/",

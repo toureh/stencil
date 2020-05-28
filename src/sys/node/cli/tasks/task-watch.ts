@@ -1,4 +1,4 @@
-import * as d from '../../declarations';
+import * as d from '../../../../declarations';
 import { checkVersion } from './task-version';
 import { runPrerenderTask } from './task-prerender';
 import { startupLog } from './startup-log';

@@ -1,4 +1,4 @@
-import * as d from '../../declarations';
+import * as d from '../../../../declarations';
 import { noop } from '@utils';
 import { request } from 'https';
 import fs from 'fs';

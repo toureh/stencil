@@ -1,6 +1,6 @@
-import * as d from '../../declarations';
+import * as d from '../../../../declarations';
 import { catchError } from '@utils';
-import { runPrerender } from '../../prerender/prerender-main';
+import { runPrerender } from '../../../../prerender/prerender-main';
 import { startupLog } from './startup-log';
 import exit from 'exit';
 import path from 'path';

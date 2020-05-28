@@ -1,5 +1,5 @@
-import * as d from '../../declarations';
-import { buildId, vermoji, version } from '../../version';
+import * as d from '../../../../declarations';
+import { buildId, vermoji, version } from '../../../../version';
 import os from 'os';
 
 export function startupLog(prcs: NodeJS.Process, config: d.Config) {
