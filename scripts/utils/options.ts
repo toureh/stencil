@@ -3,7 +3,6 @@ import { getVermoji } from './vermoji';
 import { PackageData } from './write-pkg-json';
 import { readJSONSync } from 'fs-extra';
 
-
 export function getOptions(rootDir: string, inputOpts: BuildOptions = {}) {
   const srcDir = join(rootDir, 'src');
   const packageJsonPath = join(rootDir, 'package.json');
@@ -27,8 +26,7 @@ export function getOptions(rootDir: string, inputOpts: BuildOptions = {}) {
     scriptsBundlesDir,
     bundleHelpersDir,
     output: {
-      cliDenoDir: join(rootDir, 'cli', 'deno'),
-      cliNodeDir: join(rootDir, 'cli', 'node'),
+      cliDir: join(rootDir, 'cli'),
       compilerDir: join(rootDir, 'compiler'),
       devServerDir: join(rootDir, 'dev-server'),
       internalDir: join(rootDir, 'internal'),
@@ -44,7 +42,7 @@ export function getOptions(rootDir: string, inputOpts: BuildOptions = {}) {
     isCI: false,
     isPublishRelease: false,
     vermoji: null,
-    tag: 'dev'
+    tag: 'dev',
   };
 
   Object.assign(opts, inputOpts);
@@ -65,7 +63,7 @@ export function getOptions(rootDir: string, inputOpts: BuildOptions = {}) {
 
   if (!opts.vermoji) {
     if (opts.isProd) {
-      opts.vermoji = getVermoji(opts.changelogPath)
+      opts.vermoji = getVermoji(opts.changelogPath);
     } else {
       opts.vermoji = '💎';
     }
@@ -73,7 +71,6 @@ export function getOptions(rootDir: string, inputOpts: BuildOptions = {}) {
 
   return opts;
 }
-
 
 export function createReplaceData(opts: BuildOptions) {
   const CACHE_BUSTER = 6;
@@ -111,7 +108,6 @@ export function createReplaceData(opts: BuildOptions) {
   };
 }
 
-
 export interface BuildOptions {
   rootDir?: string;
   srcDir?: string;
@@ -122,22 +118,21 @@ export interface BuildOptions {
   bundleHelpersDir?: string;
 
   output?: {
-    cliDenoDir: string;
-    cliNodeDir: string;
+    cliDir: string;
     compilerDir: string;
     devServerDir: string;
     internalDir: string;
     mockDocDir: string;
     screenshotDir: string;
     sysNodeDir: string;
-    testingDir: string
+    testingDir: string;
   };
 
   version?: string;
   buildId?: string;
   isProd?: boolean;
   isPublishRelease?: boolean;
-  isCI?: boolean,
+  isCI?: boolean;
   vermoji?: string;
   packageJsonPath?: string;
   packageLockJsonPath?: string;
@@ -149,22 +144,20 @@ export interface BuildOptions {
   terserVersion?: string;
 }
 
-
 export interface CmdLineArgs {
   'config-version'?: string;
   'config-build-id'?: string;
   'config-prod'?: string;
 }
 
-
 function getBuildId() {
   const d = new Date();
-  return[
+  return [
     d.getUTCFullYear() + '',
     ('0' + (d.getUTCMonth() + 1)).slice(-2),
     ('0' + d.getUTCDate()).slice(-2),
     ('0' + d.getUTCHours()).slice(-2),
     ('0' + d.getUTCMinutes()).slice(-2),
-    ('0' + d.getUTCSeconds()).slice(-2)
+    ('0' + d.getUTCSeconds()).slice(-2),
   ].join('');
 }

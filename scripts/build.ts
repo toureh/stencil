@@ -34,7 +34,7 @@ export async function run(rootDir: string, args: string[]) {
 
 export async function createBuild(opts: BuildOptions) {
   await Promise.all([
-    emptyDir(opts.output.cliNodeDir),
+    emptyDir(opts.output.cliDir),
     emptyDir(opts.output.compilerDir),
     emptyDir(opts.output.devServerDir),
     emptyDir(opts.output.internalDir),
@@ -45,15 +45,7 @@ export async function createBuild(opts: BuildOptions) {
 
   await sysNode(opts);
 
-  const bundles = await Promise.all([
-    cliNode(opts),
-    compiler(opts),
-    devServer(opts),
-    internal(opts),
-    mockDoc(opts),
-    screenshot(opts),
-    testing(opts),
-  ]);
+  const bundles = await Promise.all([cliNode(opts), compiler(opts), devServer(opts), internal(opts), mockDoc(opts), screenshot(opts), testing(opts)]);
 
   return bundles.flat();
 }

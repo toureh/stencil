@@ -12,13 +12,16 @@ import { RollupOptions } from 'rollup';
 export async function cliNode(opts: BuildOptions) {
   const inputDir = join(opts.transpiledDir, 'sys', 'node', 'cli');
 
+  const outDir = join(opts.output.cliDir, 'node');
+  await fs.emptyDir(outDir);
+
   // create public d.ts
   let dts = await fs.readFile(join(inputDir, 'public.d.ts'), 'utf8');
-  dts = dts.replace('@stencil/core/internal', '../internal/index');
-  await fs.writeFile(join(opts.output.cliNodeDir, 'index.d.ts'), dts);
+  dts = dts.replace('@stencil/core/internal', '../../internal/index');
+  await fs.writeFile(join(outDir, 'index.d.ts'), dts);
 
   // write package.json
-  writePkgJson(opts, opts.output.cliNodeDir, {
+  writePkgJson(opts, opts.output.cliDir, {
     name: '@stencil/core/cli',
     description: 'Stencil Node CLI.',
     main: 'node/index.js',
@@ -49,7 +52,7 @@ export async function cliNode(opts: BuildOptions) {
     input: join(inputDir, 'index.js'),
     output: {
       format: 'cjs',
-      file: join(opts.output.cliNodeDir, 'index.js'),
+      file: join(outDir, 'index.js'),
       esModule: false,
       preferConst: true,
     },
@@ -93,7 +96,7 @@ export async function cliNode(opts: BuildOptions) {
     input: join(inputDir, 'worker', 'index.js'),
     output: {
       format: 'cjs',
-      file: join(opts.output.cliNodeDir, 'cli-worker.js'),
+      file: join(outDir, 'cli-worker.js'),
       esModule: false,
       preferConst: true,
     },

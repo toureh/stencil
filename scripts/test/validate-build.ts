@@ -13,7 +13,7 @@ const pkgs: TestPackage[] = [
   {
     // cli
     packageJson: 'cli/package.json',
-    files: ['cli/cli-worker.js', 'cli/index.js'],
+    files: ['cli/node/cli-worker.js', 'cli/node/index.js'],
   },
   {
     // compiler
