@@ -832,6 +832,7 @@ export interface CompilerSystem {
    */
   createWorkerController?(compilerPath: string, maxConcurrentWorkers: number): WorkerMainController;
   encodeToBase64(str: string): string;
+  exit?(exitCode: number): void;
   /**
    * Optionally provide a fetch() function rather than using the built-in fetch().
    * First arg is a url string or Request object (RequestInfo).
@@ -871,10 +872,12 @@ export interface CompilerSystem {
    * SYNC! Does not throw.
    */
   mkdirSync(p: string, opts?: CompilerSystemMakeDirectoryOptions): CompilerSystemMakeDirectoryResults;
+  nextTick(cb: () => void): void;
   /**
    * Normalize file system path.
    */
   normalizePath(p: string): string;
+  onProcessInterrupt?(cb: () => void): void;
   /**
    * All return paths are full normalized paths, not just the file names. Always returns an array, does not throw.
    */
@@ -925,6 +928,7 @@ export interface CompilerSystem {
    * SYNC! Returns undefined if stat not found. Does not throw.
    */
   statSync(p: string): CompilerFsStats;
+  tmpdir(): string;
   /**
    * Does not throw.
    */
@@ -979,12 +983,11 @@ export interface SystemDetails {
   cpuModel: string;
   cpus: number;
   freemem(): number;
-  platform: string;
-  runtime: string;
+  platform: 'darwin' | 'windows' | 'linux' | '';
+  runtime: 'deno' | 'node' | 'browser';
   runtimeVersion: string;
   release: string;
   totalmem: number;
-  tmpDir: string;
 }
 
 export interface BuildOnEvents {

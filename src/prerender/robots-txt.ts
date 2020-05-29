@@ -1,12 +1,7 @@
 import * as d from '../declarations';
 import { catchError } from '@utils';
 import { getSitemapUrls } from './sitemap-xml';
-import fs from 'graceful-fs';
 import path from 'path';
-import { promisify } from 'util';
-import { URL } from 'url';
-
-const writeFile = promisify(fs.writeFile);
 
 export async function generateRobotsTxt(manager: d.PrerenderManager, sitemapResults: d.SitemapXmpResults) {
   if (manager.prerenderConfig.robotsTxt === null) {
@@ -67,7 +62,7 @@ export async function generateRobotsTxt(manager: d.PrerenderManager, sitemapResu
       results.url = robotsTxtUrl.href;
     }
 
-    await writeFile(results.filePath, results.content);
+    await manager.config.sys.writeFile(results.filePath, results.content);
 
     return results;
   } catch (e) {

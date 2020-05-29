@@ -1,4 +1,7 @@
+export const IS_DENO_ENV = typeof Deno !== 'undefined';
+
 export const IS_NODE_ENV =
+  !IS_DENO_ENV &&
   typeof global !== 'undefined' &&
   typeof require === 'function' &&
   !!global.process &&
@@ -25,3 +28,4 @@ export const requireFunc = (path: string) => (typeof __webpack_require__ === 'fu
 
 declare const __webpack_require__: (path: string) => any;
 declare const __non_webpack_require__: (path: string) => any;
+declare const Deno: any;

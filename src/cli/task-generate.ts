@@ -1,13 +1,7 @@
-import * as d from '../../../../declarations';
-import fs from 'graceful-fs';
+import * as d from '../declarations';
 import { join, parse, relative } from 'path';
-import { promisify } from 'util';
 import { validateComponentTag } from '@utils';
 import prompt from 'prompts';
-import exit from 'exit';
-
-const writeFile = promisify(fs.writeFile);
-const mkdir = promisify(fs.mkdir);
 
 /**
  * Task to generate component boilerplate.
@@ -15,14 +9,14 @@ const mkdir = promisify(fs.mkdir);
 export async function taskGenerate(config: d.Config) {
   if (!config.configPath) {
     config.logger.error('Please run this command in your root directory (i. e. the one containing stencil.config.ts).');
-    exit(1);
+    config.sys.exit(1);
   }
 
   const absoluteSrcDir = config.srcDir;
 
   if (!absoluteSrcDir) {
     config.logger.error(`Stencil's srcDir was not specified.`);
-    return exit(1);
+    config.sys.exit(1);
   }
 
   const input =
@@ -33,24 +27,22 @@ export async function taskGenerate(config: d.Config) {
   const tagError = validateComponentTag(componentName);
   if (tagError) {
     config.logger.error(tagError);
-    return exit(1);
+    config.sys.exit(1);
   }
 
   const extensionsToGenerate: GeneratableExtension[] = ['tsx', ...(await chooseFilesToGenerate())];
 
-  const testFolder = extensionsToGenerate.some(isTest)
-    ? 'test'
-    : '';
+  const testFolder = extensionsToGenerate.some(isTest) ? 'test' : '';
 
   const outDir = join(absoluteSrcDir, 'components', dir, componentName);
-  await mkdir(join(outDir, testFolder), { recursive: true });
+  await config.sys.mkdir(join(outDir, testFolder), { recursive: true });
 
   const writtenFiles = await Promise.all(
-    extensionsToGenerate.map(extension => writeFileByExtension(outDir, componentName, extension, extensionsToGenerate.includes('css'))),
+    extensionsToGenerate.map(extension => writeFileByExtension(config, outDir, componentName, extension, extensionsToGenerate.includes('css'))),
   ).catch(error => config.logger.error(error));
 
   if (!writtenFiles) {
-    return exit(1);
+    return config.sys.exit(1);
   }
 
   console.log();
@@ -82,14 +74,14 @@ const chooseFilesToGenerate = async () =>
 /**
  * Get a file's boilerplate by its extension and write it to disk.
  */
-const writeFileByExtension = async (path: string, name: string, extension: GeneratableExtension, withCss: boolean) => {
+const writeFileByExtension = async (config: d.Config, path: string, name: string, extension: GeneratableExtension, withCss: boolean) => {
   if (isTest(extension)) {
     path = join(path, 'test');
   }
   const outFile = join(path, `${name}.${extension}`);
   const boilerplate = getBoilerplateByExtension(name, extension, withCss);
 
-  await writeFile(outFile, boilerplate, { flag: 'wx' });
+  await config.sys.writeFile(outFile, boilerplate);
 
   return outFile;
 };

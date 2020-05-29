@@ -1,8 +1,8 @@
-import * as d from '../../../../declarations';
+import * as d from '../declarations';
 import { normalizePath } from '@utils';
 import path from 'path';
 
-export async function taskServe(process: NodeJS.Process, config: d.Config) {
+export async function taskServe(config: d.Config) {
   config.suppressLogs = true;
 
   config.flags.serve = true;
@@ -12,15 +12,15 @@ export async function taskServe(process: NodeJS.Process, config: d.Config) {
   config.devServer.websocket = false;
   config.maxConcurrentWorkers = 1;
 
-  config.devServer.root = process.cwd();
+  config.devServer.root = config.cwd;
 
   if (typeof config.flags.root === 'string') {
     if (!path.isAbsolute(config.flags.root)) {
-      config.devServer.root = path.relative(process.cwd(), config.flags.root);
+      config.devServer.root = path.relative(config.cwd, config.flags.root);
     }
   }
   config.devServer.root = normalizePath(config.devServer.root);
-  const absRoot = path.join(process.cwd(), config.devServer.root);
+  const absRoot = path.join(config.cwd, config.devServer.root);
 
   const { startServer } = await import('@stencil/core/dev-server');
   const devServer = await startServer(config.devServer, config.logger);
@@ -31,7 +31,7 @@ export async function taskServe(process: NodeJS.Process, config: d.Config) {
   console.log(`${config.logger.cyan('   Server:')} ${devServer.browserUrl}`);
   console.log(``);
 
-  process.once('SIGINT', () => {
+  config.sys.onProcessInterrupt(() => {
     devServer && devServer.close();
   });
 }

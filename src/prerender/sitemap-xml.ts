@@ -1,11 +1,6 @@
 import * as d from '../declarations';
 import { catchError } from '@utils';
-import fs from 'graceful-fs';
 import path from 'path';
-import { promisify } from 'util';
-import { URL } from 'url';
-
-const writeFile = promisify(fs.writeFile);
 
 export async function generateSitemapXml(manager: d.PrerenderManager) {
   if (manager.prerenderConfig.sitemapXml === null) {
@@ -67,7 +62,7 @@ export async function generateSitemapXml(manager: d.PrerenderManager) {
       results.url = sitemapUrl.href;
     }
 
-    await writeFile(results.filePath, results.content);
+    await manager.config.sys.writeFile(results.filePath, results.content);
 
     return results;
   } catch (e) {

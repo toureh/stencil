@@ -478,6 +478,12 @@ export const createSystem = () => {
 
   const writeFile = async (p: string, data: string) => writeFileSync(p, data);
 
+  const tmpdir = () => '/.tmp';
+
+  const tick = Promise.resolve();
+
+  const nextTick = (cb: () => void) => tick.then(cb);
+
   const generateContentHash = async (content: string) => {
     const arrayBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(content));
     const hashArray = Array.from(new Uint8Array(arrayBuffer)); // convert buffer to byte array
@@ -516,6 +522,7 @@ export const createSystem = () => {
     isSymbolicLink,
     mkdir,
     mkdirSync,
+    nextTick,
     normalizePath: normalize,
     readdir,
     readdirSync,
@@ -530,6 +537,7 @@ export const createSystem = () => {
     rmdirSync,
     stat,
     statSync,
+    tmpdir,
     unlink,
     unlinkSync,
     watchDirectory,
@@ -565,9 +573,8 @@ const getDetails = () => {
     },
     platform: '',
     release: '',
-    runtime: 'node',
+    runtime: 'browser',
     runtimeVersion: '',
-    tmpDir: '/.tmp',
     totalmem: -1,
   };
   return details;

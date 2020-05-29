@@ -1,13 +1,13 @@
-import * as d from '../../../../declarations';
-import { buildId, vermoji, version } from '../../../../version';
-import os from 'os';
+import * as d from '../declarations';
+import { buildId, vermoji, version } from '../version';
 
-export function startupLog(prcs: NodeJS.Process, config: d.Config) {
+export function startupLog(config: d.Config) {
   if (config.suppressLogs === true) {
     return;
   }
 
-  const logger = config.logger;
+  const { logger, sys } = config;
+  const sysDetails = sys.details;
   const isDebug = logger.level === 'debug';
   const isPrerelease = version.includes('-');
   const isDevBuild = version.includes('-dev.');
@@ -20,7 +20,7 @@ export function startupLog(prcs: NodeJS.Process, config: d.Config) {
     startupMsg += ' ' + logger.cyan(`v${version}`);
   }
 
-  if (prcs.platform !== 'win32' && logger.colors) {
+  if (sys.details.platform !== 'windows' && logger.colors) {
     startupMsg += ' ' + vermoji;
   }
 
@@ -47,9 +47,8 @@ export function startupLog(prcs: NodeJS.Process, config: d.Config) {
   }
 
   try {
-    const cpus = os.cpus();
-    const platformInfo = `${prcs.platform}, ${cpus[0].model}`;
-    const statsInfo = `cpus: ${cpus.length}, freemem: ${Math.round(os.freemem() / 1000000)}MB, totalmem: ${Math.round(os.totalmem() / 1000000)}MB`;
+    const platformInfo = `${sysDetails.platform}, ${sysDetails.cpuModel}`;
+    const statsInfo = `cpus: ${sysDetails.cpus}, freemem: ${Math.round(sysDetails.freemem() / 1000000)}MB, totalmem: ${Math.round(sysDetails.totalmem / 1000000)}MB`;
 
     if (isDebug) {
       logger.debug(platformInfo);
@@ -59,7 +58,7 @@ export function startupLog(prcs: NodeJS.Process, config: d.Config) {
       logger.info(statsInfo);
     }
 
-    logger.debug(`node ${prcs.version}`);
+    logger.debug(`runtime: ${sysDetails.runtime} ${sysDetails.runtimeVersion}`);
     logger.debug(`compiler: ${config.sys.getCompilerExecutingPath()}`);
     logger.debug(`build: ${buildId}`);
   } catch (e) {

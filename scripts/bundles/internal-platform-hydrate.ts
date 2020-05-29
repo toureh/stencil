@@ -3,7 +3,6 @@ import { join } from 'path';
 import { bundleDts } from '../utils/bundle-dts';
 import { aliasPlugin } from './plugins/alias-plugin';
 import { replacePlugin } from './plugins/replace-plugin';
-import { urlPlugin } from './plugins/url-plugin';
 import { getBanner } from '../utils/banner';
 import { BuildOptions } from '../utils/options';
 import rollupCommonjs from '@rollup/plugin-commonjs';
@@ -48,7 +47,6 @@ export async function internalHydrate(opts: BuildOptions) {
       },
       aliasPlugin(opts),
       replacePlugin(opts),
-      urlPlugin(opts),
       rollupResolve({
         preferBuiltins: true,
       }),
@@ -67,7 +65,6 @@ export async function internalHydrate(opts: BuildOptions) {
     plugins: [
       aliasPlugin(opts),
       replacePlugin(opts),
-      urlPlugin(opts),
       rollupResolve({
         preferBuiltins: true,
       }),

@@ -1,12 +1,9 @@
 import * as d from '../declarations';
 import { catchError, isPromise } from '@utils';
 import { hasStencilScript, inlineExternalStyleSheets, minifyScriptElements, minifyStyleElements, removeStencilScripts } from './prerender-optimize';
-import fs from 'fs';
-import { promisify } from 'util';
-
-const readFile = promisify(fs.readFile);
 
 export async function generateTemplateHtml(
+  config: d.Config,
   prerenderConfig: d.PrerenderConfig,
   diagnostics: d.Diagnostic[],
   isDebug: boolean,
@@ -30,7 +27,7 @@ export async function generateTemplateHtml(
         templateHtml = loadTemplateResult;
       }
     } else {
-      templateHtml = await readFile(srcIndexHtmlPath, 'utf8');
+      templateHtml = await config.sys.readFile(srcIndexHtmlPath);
     }
 
     let doc = createDocument(templateHtml);

@@ -3,20 +3,17 @@ import { createNodeLogger } from '../node-logger';
 import { createNodeSysWithWatch } from '../node-sys-watch';
 import exit from 'exit';
 import { join } from 'path';
-import { parseFlags } from './parse-flags';
-import { runTask } from './tasks/run-task';
+import { parseFlags } from '../../../cli/parse-flags';
+import { runTask } from '../../../cli/run-task';
 import { shouldIgnoreError, hasError, isString } from '@utils';
 import { setupWorkerController } from '../worker';
-import { taskVersion } from './tasks/task-version';
+import { taskVersion } from '../../../cli/task-version';
 
 export async function run(init: CliInitOptions) {
   if (!init) {
     throw new Error('cli missing run init');
   }
-  const prcs = init.process;
-  if (!prcs) {
-    throw new Error('cli run missing "process"');
-  }
+  const prcs = process;
   const logger = init.logger;
   if (!logger) {
     throw new Error('cli run missing "logger"');
@@ -69,7 +66,7 @@ export async function run(init: CliInitOptions) {
 
     prcs.title = `Stencil: ${validated.config.namespace}`;
 
-    await runTask(prcs, validated.config, validated.config.flags.task);
+    await runTask(validated.config, validated.config.flags.task);
   } catch (e) {
     if (!shouldIgnoreError(e)) {
       logger.error(`uncaught cli error: ${e}${logger.level === 'debug' ? e.stack : ''}`);
@@ -83,25 +80,6 @@ function getCompilerExecutingPath() {
 }
 
 function setupNodeProcess(prcs: NodeJS.Process, logger: Logger) {
-  try {
-    const v = prcs.version.substring(1).split('.');
-    const major = parseInt(v[0], 10);
-    const minor = parseInt(v[1], 10);
-    if (major < 8 || (major === 8 && minor < 9)) {
-      logger.error(
-        '\nYour current version of Node is ' + prcs.version + " but Stencil needs at least v8.9. It's recommended to install latest Node (https://github.com/nodejs/Release).\n",
-      );
-      exit(1);
-    }
-    if (major < 10 || (major === 10 && minor < 13)) {
-      logger.warn(
-        '\nYour current version of Node is ' +
-          prcs.version +
-          ', however the recommendation is a minimum of Node LTS (https://github.com/nodejs/Release). Note that future versions of Stencil will eventually remove support for non-LTS Node versions.\n',
-      );
-    }
-  } catch (e) {}
-
   prcs.on(`unhandledRejection`, (e: any) => {
     if (!shouldIgnoreError(e)) {
       let msg = 'unhandledRejection';
@@ -120,7 +98,6 @@ function setupNodeProcess(prcs: NodeJS.Process, logger: Logger) {
 }
 
 export interface CliInitOptions {
-  process?: NodeJS.Process;
   logger?: Logger;
   sys?: CompilerSystem;
 }

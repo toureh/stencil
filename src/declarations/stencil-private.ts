@@ -1639,7 +1639,6 @@ export interface ProgressLogger {
 }
 
 export interface PrerenderManager {
-  prcs: NodeJS.Process;
   config: Config;
   prerenderUrlWorker: (prerenderRequest: PrerenderRequest) => Promise<PrerenderResults>;
   devServerHostUrl: string;

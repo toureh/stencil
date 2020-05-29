@@ -88,7 +88,7 @@ export function drainPrerenderQueue(manager: d.PrerenderManager) {
 
       // could be more ready for prerendering
       // let's check again after a tick
-      manager.prcs.nextTick(() => {
+      manager.config.sys.nextTick(() => {
         drainPrerenderQueue(manager);
       });
     }
@@ -161,7 +161,7 @@ async function prerenderUrl(manager: d.PrerenderManager, url: string) {
   }
   // let's try to drain the queue again and let this
   // next call figure out if we're actually done or not
-  manager.prcs.nextTick(() => {
+  manager.config.sys.nextTick(() => {
     drainPrerenderQueue(manager);
   });
 }

@@ -1,11 +1,10 @@
-import * as d from '../../../../declarations';
+import * as d from '../declarations';
 import { checkVersion } from './task-version';
 import { runPrerenderTask } from './task-prerender';
 import { startupLog } from './startup-log';
-import exit from 'exit';
 
-export async function taskWatch(prcs: NodeJS.Process, config: d.Config) {
-  startupLog(prcs, config);
+export async function taskWatch(config: d.Config) {
+  startupLog(config);
 
   let devServer: d.DevServer = null;
   let exitCode = 0;
@@ -22,7 +21,7 @@ export async function taskWatch(prcs: NodeJS.Process, config: d.Config) {
       devServer = await startServer(config.devServer, config.logger, watcher);
     }
 
-    prcs.once('SIGINT', () => {
+    config.sys.onProcessInterrupt(() => {
       compiler.destroy();
     });
 
@@ -40,7 +39,7 @@ export async function taskWatch(prcs: NodeJS.Process, config: d.Config) {
     if (config.flags.prerender) {
       watcher.on('buildFinish', async results => {
         if (!results.hasError) {
-          const prerenderDiagnostics = await runPrerenderTask(prcs, config, devServer, results.hydrateAppFilePath, results.componentGraph, null);
+          const prerenderDiagnostics = await runPrerenderTask(config, devServer, results.hydrateAppFilePath, results.componentGraph, null);
           config.logger.printDiagnostics(prerenderDiagnostics);
         }
       });
@@ -60,6 +59,6 @@ export async function taskWatch(prcs: NodeJS.Process, config: d.Config) {
   }
 
   if (exitCode > 0) {
-    exit(exitCode);
+    config.sys.exit(exitCode);
   }
 }

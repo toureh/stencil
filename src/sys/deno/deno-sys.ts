@@ -1,32 +1,8 @@
 import { CompilerSystem, SystemDetails, CompilerSystemUnlinkResults, CompilerSystemMakeDirectoryResults, CompilerSystemWriteFileResults } from '../../declarations';
-import { asyncGlob, nodeCopyTasks } from './node-copy-tasks';
-import { cpus, freemem, platform, release, tmpdir, totalmem } from 'os';
-import { createHash } from 'crypto';
-import fs from 'graceful-fs';
 import { normalizePath } from '@utils';
-import path from 'path';
-import { NodeLazyRequire } from './node-lazy-require';
-import { NodeResolveModule } from './node-resolve-module';
-import exit from 'exit';
 
-export function createNodeSys(prcs: NodeJS.Process) {
+export function createDenoSys(Deno: any) {
   const destroys = new Set<() => Promise<void> | void>();
-  const onInterruptsCallbacks: (() => void)[] = [];
-
-  const sysCpus = cpus();
-  const osPlatform = platform();
-  const details: SystemDetails = {
-    cpuModel: sysCpus[0].model,
-    cpus: sysCpus.length,
-    freemem() {
-      return freemem();
-    },
-    platform: osPlatform === 'darwin' || osPlatform === 'linux' ? osPlatform : osPlatform === 'win32' ? 'windows' : '',
-    release: release(),
-    runtime: 'node',
-    runtimeVersion: prcs.version.replace('v', ''),
-    totalmem: totalmem(),
-  };
 
   const sys: CompilerSystem = {
     access(p) {
@@ -98,6 +74,7 @@ export function createNodeSys(prcs: NodeJS.Process) {
         }
       }),
     getCompilerExecutingPath: null,
+    normalizePath,
     mkdir(p, opts) {
       return new Promise(resolve => {
         if (opts) {
@@ -137,13 +114,6 @@ export function createNodeSys(prcs: NodeJS.Process) {
         results.error = e;
       }
       return results;
-    },
-    nextTick(cb) {
-      prcs.nextTick(cb);
-    },
-    normalizePath,
-    onProcessInterrupt(cb) {
-      onInterruptsCallbacks.push(cb);
     },
     readdir(p) {
       return new Promise(resolve => {
@@ -248,9 +218,6 @@ export function createNodeSys(prcs: NodeJS.Process) {
       } catch (e) {}
       return undefined;
     },
-    tmpdir() {
-      return tmpdir();
-    },
     unlink(p) {
       return new Promise(resolve => {
         fs.unlink(p, err => {
@@ -305,7 +272,7 @@ export function createNodeSys(prcs: NodeJS.Process) {
       return Promise.resolve(hash);
     },
     copy: nodeCopyTasks,
-    details,
+    details: getDetails(),
   };
 
   const nodeResolve = new NodeResolveModule();
@@ -323,3 +290,29 @@ export function createNodeSys(prcs: NodeJS.Process) {
 
   return sys;
 }
+
+const getDetails = () => {
+  const details: SystemDetails = {
+    cpuModel: '',
+    cpus: -1,
+    freemem() {
+      return freemem();
+    },
+    platform: '',
+    release: '',
+    runtime: 'node',
+    runtimeVersion: '',
+    tmpDir: tmpdir(),
+    totalmem: -1,
+  };
+  try {
+    const sysCpus = cpus();
+    details.cpuModel = sysCpus[0].model;
+    details.cpus = sysCpus.length;
+    details.platform = platform();
+    details.release = release();
+    details.runtimeVersion = process.version;
+    details.totalmem = totalmem();
+  } catch (e) {}
+  return details;
+};

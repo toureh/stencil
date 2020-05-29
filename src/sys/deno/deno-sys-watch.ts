@@ -1,12 +1,12 @@
 import { CompilerSystem } from '../../declarations';
 import { buildEvents } from '../../compiler/events';
-import { createNodeSys } from './node-sys';
+import { createDenoSys } from './deno-sys';
 import { normalizePath } from '@utils';
 import type TypeScript from 'typescript';
 
-export function createNodeSysWithWatch(prcs: NodeJS.Process): CompilerSystem {
+export function createDenoSysWithWatch(Deno: any): CompilerSystem {
   const ts = require('typescript') as typeof TypeScript;
-  const sys = createNodeSys(prcs);
+  const sys = createDenoSys(Deno);
   const tsWatchFile = ts.sys.watchFile;
   const tsWatchDirectory = ts.sys.watchDirectory;
 

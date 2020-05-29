@@ -1,19 +1,18 @@
-import * as d from '../../../../declarations';
+import * as d from '../declarations';
 import { checkVersion } from './task-version';
 import { runPrerenderTask } from './task-prerender';
 import { startupLog } from './startup-log';
 import { taskWatch } from './task-watch';
-import exit from 'exit';
 
-export async function taskBuild(prcs: NodeJS.Process, config: d.Config) {
+export async function taskBuild(config: d.Config) {
   if (config.flags.watch) {
     // watch build
-    await taskWatch(prcs, config);
+    await taskWatch(config);
     return;
   }
 
   // one-time build
-  startupLog(prcs, config);
+  startupLog(config);
   let exitCode = 0;
 
   try {
@@ -27,7 +26,7 @@ export async function taskBuild(prcs: NodeJS.Process, config: d.Config) {
     if (results.hasError) {
       exitCode = 1;
     } else if (config.flags.prerender) {
-      const prerenderDiagnostics = await runPrerenderTask(prcs, config, null, results.hydrateAppFilePath, results.componentGraph, null);
+      const prerenderDiagnostics = await runPrerenderTask(config, null, results.hydrateAppFilePath, results.componentGraph, null);
       config.logger.printDiagnostics(prerenderDiagnostics);
 
       if (prerenderDiagnostics.some(d => d.level === 'error')) {
@@ -43,6 +42,6 @@ export async function taskBuild(prcs: NodeJS.Process, config: d.Config) {
   }
 
   if (exitCode > 0) {
-    exit(exitCode);
+    config.sys.exit(exitCode);
   }
 }

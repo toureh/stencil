@@ -1,18 +1,17 @@
-import * as d from '../../../../declarations';
+import * as d from '../declarations';
 import { catchError } from '@utils';
-import { runPrerender } from '../../../../prerender/prerender-main';
+import { runPrerender } from '../prerender/prerender-main';
 import { startupLog } from './startup-log';
-import exit from 'exit';
 import path from 'path';
 
-export async function taskPrerender(prcs: NodeJS.Process, config: d.Config) {
-  startupLog(prcs, config);
+export async function taskPrerender(config: d.Config) {
+  startupLog(config);
 
   let hydrateAppFilePath = config.flags.unknownArgs[0];
 
   if (typeof hydrateAppFilePath !== 'string') {
     config.logger.error(`Missing hydrate app script path`);
-    exit(1);
+    config.sys.exit(1);
   }
 
   if (!path.isAbsolute(hydrateAppFilePath)) {
@@ -21,16 +20,15 @@ export async function taskPrerender(prcs: NodeJS.Process, config: d.Config) {
 
   const srcIndexHtmlPath = config.srcIndexHtml;
 
-  const diagnostics = await runPrerenderTask(prcs, config, null, hydrateAppFilePath, null, srcIndexHtmlPath);
+  const diagnostics = await runPrerenderTask(config, null, hydrateAppFilePath, null, srcIndexHtmlPath);
   config.logger.printDiagnostics(diagnostics);
 
   if (diagnostics.some(d => d.level === 'error')) {
-    exit(1);
+    config.sys.exit(1);
   }
 }
 
 export async function runPrerenderTask(
-  prcs: NodeJS.Process,
   config: d.Config,
   devServer: d.DevServer,
   hydrateAppFilePath: string,
@@ -53,7 +51,7 @@ export async function runPrerenderTask(
   const diagnostics: d.Diagnostic[] = [];
 
   try {
-    const prerenderDiagnostics = await runPrerender(prcs, __dirname, config, devServer, hydrateAppFilePath, componentGraph, srcIndexHtmlPath);
+    const prerenderDiagnostics = await runPrerender(__dirname, config, devServer, hydrateAppFilePath, componentGraph, srcIndexHtmlPath);
     diagnostics.push(...prerenderDiagnostics);
   } catch (e) {
     catchError(diagnostics, e);

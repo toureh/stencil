@@ -1,10 +1,9 @@
-import * as d from '../../../../declarations';
+import * as d from '../declarations';
 import type { Testing } from '@stencil/core/testing';
-import exit from 'exit';
 import { startupLog } from './startup-log';
 
-export async function taskTest(prcs: NodeJS.Process, config: d.Config) {
-  startupLog(prcs, config);
+export async function taskTest(config: d.Config) {
+  startupLog(config);
 
   try {
     const testingRunOpts: d.TestingRunOptions = {
@@ -47,10 +46,10 @@ export async function taskTest(prcs: NodeJS.Process, config: d.Config) {
     await testing.destroy();
 
     if (!passed) {
-      exit(1);
+      config.sys.exit(1);
     }
   } catch (e) {
     config.logger.error(e);
-    exit(1);
+    config.sys.exit(1);
   }
 }

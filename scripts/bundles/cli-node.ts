@@ -19,10 +19,10 @@ export async function cliNode(opts: BuildOptions) {
 
   // write package.json
   writePkgJson(opts, opts.output.cliNodeDir, {
-    name: '@stencil/core/cli/node',
+    name: '@stencil/core/cli',
     description: 'Stencil Node CLI.',
-    main: 'index.js',
-    types: 'index.d.ts',
+    main: 'node/index.js',
+    types: 'node/index.d.ts',
   });
 
   const external = [
