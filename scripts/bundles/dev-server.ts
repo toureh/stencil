@@ -4,7 +4,7 @@ import rollupCommonjs from '@rollup/plugin-commonjs';
 import rollupResolve from '@rollup/plugin-node-resolve';
 import { dataToEsm } from '@rollup/pluginutils';
 import { aliasPlugin } from './plugins/alias-plugin';
-import { gracefulFsPlugin } from './plugins/graceful-fs-plugin';
+import { relativePathPlugin } from './plugins/relative-path-plugin';
 import { replacePlugin } from './plugins/replace-plugin';
 import { writePkgJson } from '../utils/write-pkg-json';
 import { BuildOptions } from '../utils/options';
@@ -47,7 +47,7 @@ export async function devServer(opts: BuildOptions) {
     },
     external: ['assert', 'child_process', 'fs', 'os', 'path', 'util'],
     plugins: [
-      gracefulFsPlugin(),
+      relativePathPlugin('graceful-fs', '../sys/node/graceful-fs.js'),
       aliasPlugin(opts),
       rollupResolve({
         preferBuiltins: true,
@@ -75,16 +75,11 @@ export async function devServer(opts: BuildOptions) {
               external: true,
             };
           }
-          if (importee === 'ws') {
-            return {
-              id: './ws.js',
-              external: true,
-            };
-          }
           return null;
         },
       },
-      gracefulFsPlugin(),
+      relativePathPlugin('ws', './ws.js'),
+      relativePathPlugin('graceful-fs', '../sys/node/graceful-fs.js'),
       aliasPlugin(opts),
       rollupResolve({
         preferBuiltins: true,

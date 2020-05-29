@@ -76,7 +76,7 @@ export async function run(init: CliInitOptions) {
 }
 
 function getCompilerExecutingPath() {
-  return join(__dirname, '..', 'compiler', 'stencil.js');
+  return join(__dirname, '..', '..', 'compiler', 'stencil.js');
 }
 
 function setupNodeProcess(prcs: NodeJS.Process, logger: Logger) {

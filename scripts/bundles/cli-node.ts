@@ -3,7 +3,7 @@ import { join } from 'path';
 import rollupCommonjs from '@rollup/plugin-commonjs';
 import rollupResolve from '@rollup/plugin-node-resolve';
 import { aliasPlugin } from './plugins/alias-plugin';
-import { gracefulFsPlugin } from './plugins/graceful-fs-plugin';
+import { relativePathPlugin } from './plugins/relative-path-plugin';
 import { replacePlugin } from './plugins/replace-plugin';
 import { writePkgJson } from '../utils/write-pkg-json';
 import { BuildOptions } from '../utils/options';
@@ -58,31 +58,10 @@ export async function cliNode(opts: BuildOptions) {
     },
     external,
     plugins: [
-      {
-        name: 'cliImportResolverPlugin',
-        resolveId(importee) {
-          if (importee === '@stencil/core/compiler') {
-            return {
-              id: '../../compiler/stencil.js',
-              external: true,
-            };
-          }
-          if (importee === '@stencil/core/dev-server') {
-            return {
-              id: '../../dev-server/index.js',
-              external: true,
-            };
-          }
-          if (importee === '@stencil/core/mock-doc') {
-            return {
-              id: '../../mock-doc/index.js',
-              external: true,
-            };
-          }
-          return null;
-        },
-      },
-      gracefulFsPlugin(),
+      relativePathPlugin('@stencil/core/compiler', '../../compiler/stencil.js'),
+      relativePathPlugin('@stencil/core/dev-server', '../../dev-server/index.js'),
+      relativePathPlugin('@stencil/core/mock-doc', '../../mock-doc/index.js'),
+      relativePathPlugin('graceful-fs', '../../sys/node/graceful-fs.js'),
       aliasPlugin(opts),
       replacePlugin(opts),
       rollupResolve({
@@ -102,25 +81,9 @@ export async function cliNode(opts: BuildOptions) {
     },
     external,
     plugins: [
-      {
-        name: 'cliWorkerImportResolverPlugin',
-        resolveId(importee) {
-          if (importee === '@stencil/core/compiler') {
-            return {
-              id: '../../compiler/stencil.js',
-              external: true,
-            };
-          }
-          if (importee === '@stencil/core/mock-doc') {
-            return {
-              id: '../../mock-doc/index.js',
-              external: true,
-            };
-          }
-          return null;
-        },
-      },
-      gracefulFsPlugin(),
+      relativePathPlugin('@stencil/core/compiler', '../../compiler/stencil.js'),
+      relativePathPlugin('@stencil/core/mock-doc', '../../mock-doc/index.js'),
+      relativePathPlugin('graceful-fs', '../../sys/node/graceful-fs.js'),
       aliasPlugin(opts),
       replacePlugin(opts),
       rollupResolve({
