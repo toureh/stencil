@@ -8,7 +8,7 @@ export function startupLog(config: d.Config) {
 
   const { logger, sys } = config;
   const sysDetails = sys.details;
-  const isDebug = logger.level === 'debug';
+  const isDebug = logger.getLevel() === 'debug';
   const isPrerelease = version.includes('-');
   const isDevBuild = version.includes('-dev.');
 
@@ -19,10 +19,7 @@ export function startupLog(config: d.Config) {
   } else {
     startupMsg += ' ' + logger.cyan(`v${version}`);
   }
-
-  if (sys.details.platform !== 'windows' && logger.colors) {
-    startupMsg += ' ' + vermoji;
-  }
+  startupMsg += logger.emoji(' ' + vermoji);
 
   logger.info(startupMsg);
 

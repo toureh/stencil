@@ -2,15 +2,19 @@ import { CompilerSystem, Logger } from '../../../declarations';
 import { createDenoLogger } from '../deno-logger';
 import { createDenoSysWithWatch } from '../deno-sys-watch';
 import { join } from 'path';
-import { parseFlags } from '../../../cli/parse-flags';
-import { runTask } from '../../../cli/run-task';
-import { shouldIgnoreError, hasError } from '@utils';
+import { parseFlags } from '../../shared/cli/parse-flags';
+import { runTask } from './run-task';
+import { hasError } from '@utils';
 import { setupWorkerController } from '../worker';
-import { taskVersion } from '../../../cli/task-version';
+import { taskVersion } from '../../shared/cli/task-version';
 
 export async function run(init: CliInitOptions) {
   if (!init) {
     throw new Error('cli missing run init');
+  }
+  const Deno = init.Deno;
+  if (!Deno) {
+    throw new Error('cli run missing "Deno"');
   }
   const logger = init.logger;
   if (!logger) {
@@ -62,22 +66,18 @@ export async function run(init: CliInitOptions) {
 
     await runTask(validated.config, validated.config.flags.task);
   } catch (e) {
-    if (!shouldIgnoreError(e)) {
-      logger.error(`uncaught cli error: ${e}${logger.level === 'debug' ? e.stack : ''}`);
-      Deno.exit(1);
-    }
+    Deno.exit(1);
   }
 }
 
 function getCompilerExecutingPath() {
-  return join(__dirname, '..', 'compiler', 'stencil.js');
+  return join(__dirname, '..', '..', 'compiler', 'stencil.js');
 }
 
 export interface CliInitOptions {
+  Deno?: any;
   logger?: Logger;
   sys?: CompilerSystem;
 }
 
 export { createDenoLogger, createDenoSysWithWatch as createDenoSystem, parseFlags, runTask };
-
-declare const Deno: any;

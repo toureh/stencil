@@ -8,10 +8,7 @@ import semiver from 'semiver';
 export class NodeLazyRequire implements d.LazyRequire {
   private moduleData = new Map<string, { fromDir: string; modulePath: string }>();
 
-  constructor(
-    private nodeResolveModule: NodeResolveModule,
-    private lazyDependencies: {[dep: string]: [string, string]}
-  ) {}
+  constructor(private nodeResolveModule: NodeResolveModule, private lazyDependencies: { [dep: string]: [string, string] }) {}
 
   async ensure(logger: d.Logger, fromDir: string, ensureModuleIds: string[]) {
     const depsToInstall: DepToInstall[] = [];
@@ -130,7 +127,7 @@ function npmInstall(logger: d.Logger, fromDir: string, moduleIds: string[]) {
     };
     opts.env.NODE_ENV = 'development';
 
-    if (logger.level === 'debug') {
+    if (logger.getLevel() === 'debug') {
       args.push('--verbose');
     }
 
@@ -156,7 +153,7 @@ function npmInstall(logger: d.Logger, fromDir: string, moduleIds: string[]) {
     }
 
     childProcess.once('exit', exitCode => {
-      if (logger.level === 'debug') {
+      if (logger.getLevel() === 'debug') {
         logger.debug(`${cmd}, exit ${exitCode}`);
       }
 

@@ -12,6 +12,7 @@ import { sysNode } from './bundles/sys-node';
 import { testing } from './bundles/testing';
 import { validateBuild } from './test/validate-build';
 import { rollup } from 'rollup';
+import { cliDeno } from './bundles/cli-deno';
 
 export async function run(rootDir: string, args: string[]) {
   try {
@@ -46,6 +47,7 @@ export async function createBuild(opts: BuildOptions) {
   await sysNode(opts);
 
   const bundles = await Promise.all([cliNode(opts), compiler(opts), devServer(opts), internal(opts), mockDoc(opts), screenshot(opts), testing(opts)]);
+  // const bundles = await Promise.all([cliDeno(opts)]);
 
   return bundles.flat();
 }

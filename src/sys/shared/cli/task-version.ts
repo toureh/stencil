@@ -19,7 +19,7 @@ export async function checkVersion(config: d.Config, currentVersion: string): Pr
       if (latestVersion != null) {
         return () => {
           if (semiver(currentVersion, latestVersion) < 0) {
-            printUpdateMessage(config.logger, currentVersion, latestVersion);
+            printUpdateMessage(config, currentVersion, latestVersion);
           } else {
             console.debug(`${config.logger.cyan('@stencil/core')} version ${config.logger.green(currentVersion)} is the latest version`);
           }

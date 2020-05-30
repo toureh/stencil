@@ -30,7 +30,7 @@ export async function run(init: CliInitOptions) {
     const flags = parseFlags(prcs.argv.slice(2));
 
     if (flags.ci) {
-      logger.colors = false;
+      logger.enableColors(false);
     }
 
     if (flags.task === 'version' || flags.version) {
@@ -72,7 +72,7 @@ export async function run(init: CliInitOptions) {
     await runTask(validated.config, validated.config.flags.task);
   } catch (e) {
     if (!shouldIgnoreError(e)) {
-      logger.error(`uncaught cli error: ${e}${logger.level === 'debug' ? e.stack : ''}`);
+      logger.error(`uncaught cli error: ${e}${logger.getLevel() === 'debug' ? e.stack : ''}`);
       exit(1);
     }
   }

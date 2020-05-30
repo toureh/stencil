@@ -21,7 +21,7 @@ export const getConfig = (userConfig: d.Config) => {
   } else if (typeof config.logLevel !== 'string') {
     config.logLevel = 'info';
   }
-  config.logger.level = config.logLevel;
+  config.logger.setLevel(config.logLevel);
 
   return config;
 };

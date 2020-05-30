@@ -79,7 +79,7 @@ export const loadConfig = async (init: LoadConfigInit = {}) => {
     }
 
     results.config.logger = init.logger || results.config.logger || createLogger();
-    results.config.logger.level = results.config.logLevel;
+    results.config.logger.setLevel(results.config.logLevel);
 
     const loadedTs = await tsPromise;
     if (!hasError(results.diagnostics)) {

@@ -339,7 +339,7 @@ export interface Config extends StencilConfig {
   devServer?: DevServerConfig;
   flags?: ConfigFlags;
   fsNamespace?: string;
-  logLevel?: 'error' | 'warn' | 'info' | 'debug' | string;
+  logLevel?: LogLevel;
   rootDir?: string;
   packageJsonFilePath?: string;
   sourceMap?: boolean;
@@ -1566,32 +1566,36 @@ export interface EmulateViewport {
   isLandscape?: boolean;
 }
 
+export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | string;
+
 /**
  * Common logger to be used by the compiler, dev-server and CLI. The CLI will use a
  * NodeJS based console logging and colors, and the web will use browser based
  * logs and colors.
  */
 export interface Logger {
-  colors?: boolean;
-  level: string;
-  debug(...msg: any[]): void;
-  info(...msg: any[]): void;
-  warn(...msg: any[]): void;
-  error(...msg: any[]): void;
-  createTimeSpan(startMsg: string, debug?: boolean, appendTo?: string[]): LoggerTimeSpan;
-  printDiagnostics(diagnostics: Diagnostic[], cwd?: string): void;
-  red(msg: string): string;
-  green(msg: string): string;
-  yellow(msg: string): string;
-  blue(msg: string): string;
-  magenta(msg: string): string;
-  cyan(msg: string): string;
-  gray(msg: string): string;
-  bold(msg: string): string;
-  dim(msg: string): string;
-  bgRed(msg: string): string;
-  buildLogFilePath: string;
-  writeLogs(append: boolean): void;
+  enableColors: (useColors: boolean) => void;
+  setLevel: (level: LogLevel) => void;
+  getLevel: () => LogLevel;
+  debug: (...msg: any[]) => void;
+  info: (...msg: any[]) => void;
+  warn: (...msg: any[]) => void;
+  error: (...msg: any[]) => void;
+  createTimeSpan: (startMsg: string, debug?: boolean, appendTo?: string[]) => LoggerTimeSpan;
+  printDiagnostics: (diagnostics: Diagnostic[], cwd?: string) => void;
+  red: (msg: string) => string;
+  green: (msg: string) => string;
+  yellow: (msg: string) => string;
+  blue: (msg: string) => string;
+  magenta: (msg: string) => string;
+  cyan: (msg: string) => string;
+  gray: (msg: string) => string;
+  bold: (msg: string) => string;
+  dim: (msg: string) => string;
+  bgRed: (msg: string) => string;
+  emoji: (e: string) => string;
+  setLogFilePath?: (p: string) => void;
+  writeLogs?: (append: boolean) => void;
 }
 
 export interface LoggerTimeSpan {
