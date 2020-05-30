@@ -8,6 +8,7 @@ import { replacePlugin } from './plugins/replace-plugin';
 import { writePkgJson } from '../utils/write-pkg-json';
 import { BuildOptions } from '../utils/options';
 import { RollupOptions } from 'rollup';
+import { prettyMinifyPlugin } from './plugins/pretty-minify';
 
 export async function cliNode(opts: BuildOptions) {
   const inputDir = join(opts.transpiledDir, 'sys', 'node', 'cli');
@@ -62,20 +63,25 @@ export async function cliNode(opts: BuildOptions) {
       relativePathPlugin('@stencil/core/dev-server', '../../dev-server/index.js'),
       relativePathPlugin('@stencil/core/mock-doc', '../../mock-doc/index.js'),
       relativePathPlugin('graceful-fs', '../../sys/node/graceful-fs.js'),
+      relativePathPlugin('prompts', '../../sys/node/prompts.js'),
       aliasPlugin(opts),
       replacePlugin(opts),
       rollupResolve({
         preferBuiltins: true,
       }),
       rollupCommonjs(),
+      prettyMinifyPlugin(opts),
     ],
+    treeshake: {
+      moduleSideEffects: false,
+    },
   };
 
   const cliWorkerBundle: RollupOptions = {
-    input: join(inputDir, 'worker', 'index.js'),
+    input: join(inputDir, 'worker.js'),
     output: {
       format: 'cjs',
-      file: join(outDir, 'cli-worker.js'),
+      file: join(outDir, 'worker.js'),
       esModule: false,
       preferConst: true,
     },
@@ -91,6 +97,9 @@ export async function cliNode(opts: BuildOptions) {
       }),
       rollupCommonjs(),
     ],
+    treeshake: {
+      moduleSideEffects: false,
+    },
   };
 
   return [cliBundle, cliWorkerBundle];

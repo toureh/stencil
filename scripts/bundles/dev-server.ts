@@ -11,6 +11,7 @@ import { BuildOptions } from '../utils/options';
 import { RollupOptions, OutputChunk, Plugin } from 'rollup';
 import terser from 'terser';
 import ts from 'typescript';
+import { prettyMinifyPlugin } from './plugins/pretty-minify';
 
 export async function devServer(opts: BuildOptions) {
   const inputDir = join(opts.transpiledDir, 'dev-server');
@@ -45,7 +46,7 @@ export async function devServer(opts: BuildOptions) {
       esModule: false,
       preferConst: true,
     },
-    external: ['assert', 'child_process', 'fs', 'os', 'path', 'util'],
+    external: ['assert', 'child_process', 'fs', 'os', 'path', 'url', 'util'],
     plugins: [
       relativePathPlugin('graceful-fs', '../sys/node/graceful-fs.js'),
       aliasPlugin(opts),
@@ -53,7 +54,11 @@ export async function devServer(opts: BuildOptions) {
         preferBuiltins: true,
       }),
       rollupCommonjs(),
+      prettyMinifyPlugin(opts),
     ],
+    treeshake: {
+      moduleSideEffects: false,
+    },
   };
 
   const devServerWorkerBundle: RollupOptions = {
@@ -86,7 +91,11 @@ export async function devServer(opts: BuildOptions) {
       }),
       rollupCommonjs(),
       replacePlugin(opts),
+      prettyMinifyPlugin(opts),
     ],
+    treeshake: {
+      moduleSideEffects: false,
+    },
   };
 
   function appErrorCssPlugin(): Plugin {

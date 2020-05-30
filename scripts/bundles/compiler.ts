@@ -15,6 +15,7 @@ import { writePkgJson } from '../utils/write-pkg-json';
 import { BuildOptions } from '../utils/options';
 import { RollupOptions, OutputChunk } from 'rollup';
 import terser from 'terser';
+import { prettyMinifyPlugin } from './plugins/pretty-minify';
 
 export async function compiler(opts: BuildOptions) {
   const inputDir = join(opts.transpiledDir, 'compiler');

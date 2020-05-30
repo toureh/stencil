@@ -3,17 +3,20 @@ import { createNodeLogger } from '../node-logger';
 import { createNodeSysWithWatch } from '../node-sys-watch';
 import exit from 'exit';
 import { join } from 'path';
-import { parseFlags } from '../../../cli/parse-flags';
-import { runTask } from '../../../cli/run-task';
+import { parseFlags } from '../../shared/cli/parse-flags';
+import { runTask } from './run-task';
 import { shouldIgnoreError, hasError, isString } from '@utils';
 import { setupWorkerController } from '../worker';
-import { taskVersion } from '../../../cli/task-version';
+import { taskVersion } from '../../shared/cli/task-version';
 
 export async function run(init: CliInitOptions) {
   if (!init) {
     throw new Error('cli missing run init');
   }
-  const prcs = process;
+  const prcs = init.process;
+  if (!prcs) {
+    throw new Error('cli run missing "process"');
+  }
   const logger = init.logger;
   if (!logger) {
     throw new Error('cli run missing "logger"');
@@ -98,6 +101,7 @@ function setupNodeProcess(prcs: NodeJS.Process, logger: Logger) {
 }
 
 export interface CliInitOptions {
+  process?: NodeJS.Process;
   logger?: Logger;
   sys?: CompilerSystem;
 }

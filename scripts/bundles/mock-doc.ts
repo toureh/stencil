@@ -126,10 +126,7 @@ function getMockDocExports(srcIndexDts: string) {
   const dtsExports: string[] = [];
 
   exportLines.forEach(ln => {
-    const splt = ln
-      .split('{')[1]
-      .split('}')[0]
-      .trim();
+    const splt = ln.split('{')[1].split('}')[0].trim();
     const exportNames = splt
       .split(',')
       .map(n => n.trim())

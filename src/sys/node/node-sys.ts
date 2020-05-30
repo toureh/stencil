@@ -83,6 +83,7 @@ export function createNodeSys(prcs: NodeJS.Process) {
       return normalizePath(prcs.cwd());
     },
     glob: asyncGlob,
+    installMessage: () => `npm install @stencil/core`,
     isSymbolicLink: (p: string) =>
       new Promise<boolean>(resolve => {
         try {

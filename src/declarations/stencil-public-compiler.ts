@@ -832,6 +832,9 @@ export interface CompilerSystem {
    */
   createWorkerController?(compilerPath: string, maxConcurrentWorkers: number): WorkerMainController;
   encodeToBase64(str: string): string;
+  /**
+   * process.exit()
+   */
   exit?(exitCode: number): void;
   /**
    * Optionally provide a fetch() function rather than using the built-in fetch().
@@ -859,6 +862,10 @@ export interface CompilerSystem {
    * Aync glob task. Only available in NodeJS compiler system.
    */
   glob?(pattern: string, options: { cwd?: string; nodir?: boolean; [key: string]: any }): Promise<string[]>;
+  /**
+   * The "npm install @stencil/core" message
+   */
+  installMessage?(): string;
   /**
    * Tests if the path is a symbolic link or not. Always resolves a boolean. Does not throw.
    */

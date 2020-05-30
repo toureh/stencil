@@ -53,6 +53,9 @@ export async function screenshot(opts: BuildOptions) {
       rollupCommonjs(),
       replacePlugin(opts),
     ],
+    treeshake: {
+      moduleSideEffects: false,
+    },
   };
 
   const pixelMatchBundle: RollupOptions = {

@@ -44,7 +44,7 @@ export async function runPrerender(
     let workerCtrl: NodeWorkerController = null;
 
     try {
-      const cliWorkerPath = path.join(cliRootDir, 'cli-worker.js');
+      const cliWorkerPath = path.join(cliRootDir, 'worker.js');
       workerCtrl = new NodeWorkerController('stencil-cli-worker', cliWorkerPath, config.maxConcurrentWorkers, config.logger);
 
       await Promise.all(

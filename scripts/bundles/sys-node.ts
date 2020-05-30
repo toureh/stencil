@@ -13,6 +13,7 @@ export async function sysNode(opts: BuildOptions) {
   await Promise.all([
     bundleExternal(opts, opts.output.sysNodeDir, cachedDir, 'autoprefixer.js'),
     bundleExternal(opts, opts.output.sysNodeDir, cachedDir, 'graceful-fs.js'),
+    bundleExternal(opts, opts.output.sysNodeDir, cachedDir, 'prompts.js'),
     bundleExternal(opts, opts.output.sysNodeDir, cachedDir, 'node-fetch.js'),
     bundleExternal(opts, opts.output.devServerDir, cachedDir, 'open-in-editor-api.js'),
     bundleExternal(opts, opts.output.devServerDir, cachedDir, 'ws.js'),
