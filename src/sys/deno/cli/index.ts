@@ -29,7 +29,7 @@ export async function run(init: CliInitOptions) {
     const flags = parseFlags(Deno.args);
 
     if (flags.ci) {
-      logger.colors = false;
+      logger.enableColors(false);
     }
 
     if (flags.task === 'version' || flags.version) {

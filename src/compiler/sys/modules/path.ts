@@ -1,25 +1,23 @@
 import { PlatformPath } from '../../../declarations';
-import pathBrowserify from 'path-browserify';
-import { IS_NODE_ENV, normalizePath, requireFunc } from '@utils';
+import { getPathUtils } from '@path-utils';
+import { IS_WINDOWS_ENV, normalizePath } from '@utils';
 
-const path: PlatformPath = {} as any;
+const pathUtils = getPathUtils({
+  isWindows: IS_WINDOWS_ENV,
+});
 
-if (IS_NODE_ENV) {
-  const nodePath = requireFunc('path');
-  Object.assign(path, nodePath);
+const path: PlatformPath = pathUtils.path;
 
-  path.join = (...args: string[]) => normalizePath(nodePath.join.apply(nodePath, args));
-  path.normalize = (...args: string[]) => normalizePath(nodePath.normalize.apply(nodePath, args));
-  path.relative = (...args: string[]) => normalizePath(nodePath.relative.apply(nodePath, args));
-  path.resolve = (...args: string[]) => normalizePath(nodePath.resolve.apply(nodePath, args));
-} else {
-  Object.assign(path, pathBrowserify);
+if (IS_WINDOWS_ENV) {
+  path.normalize = (...args: string[]) => normalizePath(path.normalize.apply(path, args));
+  path.join = (...args: string[]) => normalizePath(path.join.apply(path, args));
+  path.relative = (...args: string[]) => normalizePath(path.relative.apply(path, args));
+  path.resolve = (...args: string[]) => normalizePath(path.resolve.apply(path, args));
 }
 
 export const basename = path.basename;
 export const dirname = path.dirname;
 export const extname = path.extname;
-export const format = path.format;
 export const isAbsolute = path.isAbsolute;
 export const join = path.join;
 export const normalize = path.normalize;
@@ -28,4 +26,6 @@ export const resolve = path.resolve;
 export const sep = path.sep;
 export const delimiter = path.delimiter;
 export const posix = path.posix;
+export const win32 = path.win32;
+
 export default path;

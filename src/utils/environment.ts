@@ -9,7 +9,11 @@ export const IS_NODE_ENV =
   typeof __filename === 'string' &&
   (!((global as any) as Window).origin || typeof ((global as any) as Window).origin !== 'string');
 
+export const IS_DENO_WINDOWS_ENV = IS_DENO_ENV && Deno.build.os === 'windows';
+
 export const IS_NODE_WINDOWS_ENV = IS_NODE_ENV && global.process.platform === 'win32';
+
+export const IS_WINDOWS_ENV = IS_DENO_WINDOWS_ENV || IS_NODE_WINDOWS_ENV;
 
 export const IS_LOCATION_ENV = typeof location !== 'undefined';
 

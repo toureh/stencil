@@ -1,20 +1,15 @@
 import { Diagnostic, Logger, LogLevel, LoggerTimeSpan, PrintLine } from '../../declarations';
 
 export const createTerminalLogger = (loggerSys: TerminalLoggerSys) => {
-  let useColors = true;
   let level: LogLevel = 'info';
   let logFilePath: string = null;
   const writeLogQueue: string[] = [];
-
-  const enableColors = (uc: boolean) => (useColors = uc);
 
   const setLevel = (l: LogLevel) => (level = l);
 
   const getLevel = () => level;
 
   const setLogFilePath = (p: string) => (logFilePath = p);
-
-  const emoji = (e: string) => (useColors ? loggerSys.emoji(e) : '');
 
   const info = (...msg: any[]) => {
     if (shouldLog('info')) {
@@ -122,7 +117,7 @@ export const createTerminalLogger = (loggerSys: TerminalLoggerSys) => {
     let msg = finishMsg;
 
     if (colorName) {
-      msg = color(finishMsg, colorName);
+      msg = loggerSys.color(finishMsg, colorName);
     }
     if (textBold) {
       msg = bold(msg);
@@ -219,20 +214,16 @@ export const createTerminalLogger = (loggerSys: TerminalLoggerSys) => {
     writeLogQueue.length = 0;
   };
 
-  const color = (msg: string, colorName: ColorType) => {
-    return useColors ? loggerSys.color(msg, colorName) : msg;
-  };
-
-  const red = (msg: string) => color(msg, 'red');
-  const green = (msg: string) => color(msg, 'green');
-  const yellow = (msg: string) => color(msg, 'yellow');
-  const blue = (msg: string) => color(msg, 'blue');
-  const magenta = (msg: string) => color(msg, 'magenta');
-  const cyan = (msg: string) => color(msg, 'cyan');
-  const gray = (msg: string) => color(msg, 'gray');
-  const bold = (msg: string) => color(msg, 'bold');
-  const dim = (msg: string) => color(msg, 'dim');
-  const bgRed = (msg: string) => color(msg, 'bgRed');
+  const red = (msg: string) => loggerSys.color(msg, 'red');
+  const green = (msg: string) => loggerSys.color(msg, 'green');
+  const yellow = (msg: string) => loggerSys.color(msg, 'yellow');
+  const blue = (msg: string) => loggerSys.color(msg, 'blue');
+  const magenta = (msg: string) => loggerSys.color(msg, 'magenta');
+  const cyan = (msg: string) => loggerSys.color(msg, 'cyan');
+  const gray = (msg: string) => loggerSys.color(msg, 'gray');
+  const bold = (msg: string) => loggerSys.color(msg, 'bold');
+  const dim = (msg: string) => loggerSys.color(msg, 'dim');
+  const bgRed = (msg: string) => loggerSys.color(msg, 'bgRed');
 
   const shouldLog = (level: string): boolean => {
     return LOG_LEVELS.indexOf(level) >= LOG_LEVELS.indexOf(level);
@@ -427,8 +418,8 @@ export const createTerminalLogger = (loggerSys: TerminalLoggerSys) => {
   };
 
   const logger: Logger = {
-    enableColors,
-    emoji,
+    enableColors: loggerSys.enableColors,
+    emoji: loggerSys.emoji,
     getLevel,
     setLevel,
     debug,
@@ -456,6 +447,7 @@ export const createTerminalLogger = (loggerSys: TerminalLoggerSys) => {
 export interface TerminalLoggerSys {
   color: (msg: string, colorName: ColorType) => string;
   emoji: (msg: string) => string;
+  enableColors: (useColors: boolean) => void;
   cwd: () => string;
   getColumns: () => number;
   memoryUsage: () => number;

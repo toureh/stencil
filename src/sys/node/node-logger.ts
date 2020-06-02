@@ -4,14 +4,17 @@ import fs from 'graceful-fs';
 import path from 'path';
 
 export const createNodeLogger = (prcs: NodeJS.Process) => {
+  let useColors = true;
   const minColumns = 60;
   const maxColumns = 120;
 
-  const color = (msg: string, colorType: ColorType) => (ansiColor as any)[colorType](msg);
+  const color = (msg: string, colorType: ColorType) => (useColors ? (ansiColor as any)[colorType](msg) : msg);
+
+  const cwd = () => prcs.cwd();
 
   const emoji = (e: string) => (prcs.platform !== 'win32' ? e : '');
 
-  const cwd = () => prcs.cwd();
+  const enableColors = (uc: boolean) => (useColors = uc);
 
   const getColumns = () => {
     const terminalWidth = (prcs.stdout && (prcs.stdout as any).columns) || 80;
@@ -40,8 +43,9 @@ export const createNodeLogger = (prcs: NodeJS.Process) => {
 
   const loggerSys: TerminalLoggerSys = {
     color,
-    emoji,
     cwd,
+    emoji,
+    enableColors,
     getColumns,
     memoryUsage,
     relativePath,

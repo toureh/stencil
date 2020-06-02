@@ -2653,16 +2653,16 @@ export interface TransformOptions {
 }
 
 export interface PlatformPath {
-  basename(p: string, ext?: string): string;
-  dirname(p: string): string;
-  extname(p: string): string;
-  format(pP: any): string;
-  join(...paths: string[]): string;
-  isAbsolute(p: string): boolean;
   normalize(p: string): string;
-  relative(from: string, to: string): string;
+  join(...paths: string[]): string;
   resolve(...pathSegments: string[]): string;
+  isAbsolute(p: string): boolean;
+  relative(from: string, to: string): string;
+  dirname(p: string): string;
+  basename(p: string, ext?: string): string;
+  extname(p: string): string;
   sep: string;
   delimiter: string;
-  posix: PlatformPath;
+  posix: any;
+  win32: any;
 }

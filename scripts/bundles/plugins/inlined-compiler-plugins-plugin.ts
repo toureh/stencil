@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import path from 'path';
+import { join } from 'path';
 import { rollup, Plugin } from 'rollup';
 import rollupCommonjs from '@rollup/plugin-commonjs';
 import rollupJson from '@rollup/plugin-json';
@@ -25,7 +25,7 @@ export function inlinedCompilerPluginsPlugin(opts: BuildOptions, inputDir: strin
 }
 
 async function bundleCompilerPlugins(opts: BuildOptions, inputDir: string) {
-  const cacheFile = path.join(opts.transpiledDir, 'compiler-plugins-bundle-cache.js');
+  const cacheFile = join(opts.transpiledDir, 'compiler-plugins-bundle-cache.js');
 
   if (!opts.isProd) {
     try {
@@ -34,14 +34,17 @@ async function bundleCompilerPlugins(opts: BuildOptions, inputDir: string) {
   }
 
   const build = await rollup({
-    input: path.join(inputDir, 'sys', 'modules', 'compiler-plugins.js'),
+    input: join(inputDir, 'sys', 'modules', 'compiler-plugins.js'),
     external: ['fs', 'module', 'path', 'util'],
     plugins: [
       {
         name: 'bundleCompilerPlugins',
         resolveId(id) {
           if (id === 'resolve') {
-            return path.join(opts.bundleHelpersDir, 'resolve.js');
+            return join(opts.bundleHelpersDir, 'resolve.js');
+          }
+          if (id === '@path-utils') {
+            return join(opts.transpiledDir, 'path-utils.js');
           }
           return null;
         },

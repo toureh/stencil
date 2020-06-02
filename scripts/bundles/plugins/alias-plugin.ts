@@ -38,6 +38,9 @@ export function aliasPlugin(opts: BuildOptions): Plugin {
       if (id === '@utils') {
         return join(opts.transpiledDir, 'utils', 'index.js');
       }
+      if (id === '@path-utils') {
+        return join(opts.transpiledDir, 'path-utils.js');
+      }
       if (helperResolvers.has(id)) {
         return join(opts.bundleHelpersDir, `${id}.js`);
       }

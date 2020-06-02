@@ -5,7 +5,7 @@ import { CompilerSystem, Config, ConfigFlags, Logger, TaskCommand } from '@stenc
  * By default the CLI uses this method to create the Deno logger. The Deno "process"
  * object should be provided as the first argument.
  */
-export declare function createDenoLogger(process: any): Logger;
+export declare function createDenoLogger(Deno: any): Logger;
 
 /**
  * Creates the "system", based off of Deno APIs, used by the compiler. This includes any and
@@ -13,7 +13,7 @@ export declare function createDenoLogger(process: any): Logger;
  * `fs` module. Other system APIs include any use of `crypto` to hash content. The Deno "process"
  * object should be provided as the first argument.
  */
-export declare function createDenoSystem(process: any): CompilerSystem;
+export declare function createDenoSystem(Deno: any): CompilerSystem;
 
 /**
  * Used by the CLI to parse command-line arguments into a typed `ConfigFlags` object.
@@ -28,7 +28,7 @@ export declare function run(init: CliInitOptions): Promise<void>;
 export interface CliInitOptions {
   /**
    * `Deno` instance.
-   * https://Deno.org/api/process.html
+   * https://doc.deno.land/https/github.com/denoland/deno/releases/latest/download/lib.deno.d.ts
    */
   Deno?: any;
   /**
@@ -42,7 +42,7 @@ export interface CliInitOptions {
 }
 
 /**
- * Runs individual tasks giving a `Deno` instance, Stencil `config`, and task command.
+ * Runs individual task commands.
  */
-export declare function runTask(process: any, config: Config, task: TaskCommand): Promise<void>;
+export declare function runTask(config: Config, task: TaskCommand): Promise<void>;
 export { CompilerSystem, Config, ConfigFlags, Logger, TaskCommand };

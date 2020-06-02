@@ -5,21 +5,21 @@ export function createDenoSys(Deno: any) {
   const destroys = new Set<() => Promise<void> | void>();
 
   const sys: CompilerSystem = {
-    access(p) {
-      return new Promise(resolve => {
-        fs.access(p, err => {
-          const hasAccess = !err;
-          resolve(hasAccess);
-        });
-      });
+    async access(p) {
+      try {
+        await Deno.stat(p);
+        return true;
+      } catch (e) {
+        return false;
+      }
     },
     accessSync(p) {
-      let hasAccess = false;
       try {
-        fs.accessSync(p);
-        hasAccess = true;
-      } catch (e) {}
-      return hasAccess;
+        Deno.statSync(p);
+        return true;
+      } catch (e) {
+        return false;
+      }
     },
     addDestory(cb) {
       destroys.add(cb);
@@ -27,12 +27,13 @@ export function createDenoSys(Deno: any) {
     removeDestory(cb) {
       destroys.delete(cb);
     },
-    copyFile(src, dst) {
-      return new Promise(resolve => {
-        fs.copyFile(src, dst, err => {
-          resolve(!err);
-        });
-      });
+    async copyFile(src, dst) {
+      try {
+        await Deno.copyFile(src, dst);
+        return true;
+      } catch (e) {
+        return false;
+      }
     },
     async destroy() {
       const waits: Promise<void>[] = [];
@@ -53,29 +54,26 @@ export function createDenoSys(Deno: any) {
       return Buffer.from(str).toString('base64');
     },
     exit(exitCode) {
-      exit(exitCode);
+      Deno.exit(exitCode);
     },
     getCurrentDirectory() {
-      return normalizePath(prcs.cwd());
+      return normalizePath(Deno.cwd());
     },
-    glob: asyncGlob,
-    isSymbolicLink: (p: string) =>
-      new Promise<boolean>(resolve => {
-        try {
-          fs.lstat(p, (err, stats) => {
-            if (err) {
-              resolve(false);
-            } else {
-              resolve(stats.isSymbolicLink());
-            }
-          });
-        } catch (e) {
-          resolve(false);
-        }
-      }),
+    glob(_pattern, _opts) {
+      return null;
+    },
+    async isSymbolicLink(p) {
+      try {
+        const stat = await Deno.stat(p);
+        return stat.isSymlink;
+      } catch (e) {
+        return false;
+      }
+    },
     getCompilerExecutingPath: null,
     normalizePath,
-    mkdir(p, opts) {
+    async mkdir(p, opts) {
+      await Deno.mkdir(p, opts);
       return new Promise(resolve => {
         if (opts) {
           fs.mkdir(p, opts, err => {

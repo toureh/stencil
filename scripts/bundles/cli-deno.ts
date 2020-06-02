@@ -13,7 +13,7 @@ import { prettyMinifyPlugin } from './plugins/pretty-minify';
 export async function cliDeno(opts: BuildOptions) {
   const inputDir = join(opts.transpiledDir, 'sys', 'deno', 'cli');
 
-  const outDir = join(opts.output.cliDir, 'node');
+  const outDir = join(opts.output.cliDir, 'deno');
   await fs.emptyDir(outDir);
 
   // create public d.ts
@@ -25,7 +25,7 @@ export async function cliDeno(opts: BuildOptions) {
     input: join(inputDir, 'index.js'),
     output: {
       format: 'es',
-      file: join(outDir, 'index.js'),
+      file: join(outDir, 'index.mjs'),
       esModule: false,
       preferConst: true,
     },
@@ -46,28 +46,29 @@ export async function cliDeno(opts: BuildOptions) {
     },
   };
 
-  const cliWorkerBundle: RollupOptions = {
-    input: join(inputDir, 'worker.js'),
-    output: {
-      format: 'es',
-      file: join(outDir, 'worker.js'),
-      esModule: false,
-      preferConst: true,
-    },
-    plugins: [
-      relativePathPlugin('@stencil/core/compiler', '../../compiler/stencil.js'),
-      relativePathPlugin('@stencil/core/mock-doc', '../../mock-doc/index.mjs'),
-      aliasPlugin(opts),
-      replacePlugin(opts),
-      rollupResolve({
-        preferBuiltins: true,
-      }),
-      rollupCommonjs(),
-    ],
-    treeshake: {
-      moduleSideEffects: false,
-    },
-  };
+  // const cliWorkerBundle: RollupOptions = {
+  //   input: join(inputDir, 'worker.js'),
+  //   output: {
+  //     format: 'es',
+  //     file: join(outDir, 'worker.js'),
+  //     esModule: false,
+  //     preferConst: true,
+  //   },
+  //   plugins: [
+  //     relativePathPlugin('@stencil/core/compiler', '../../compiler/stencil.js'),
+  //     relativePathPlugin('@stencil/core/mock-doc', '../../mock-doc/index.mjs'),
+  //     aliasPlugin(opts),
+  //     replacePlugin(opts),
+  //     rollupResolve({
+  //       preferBuiltins: true,
+  //     }),
+  //     rollupCommonjs(),
+  //   ],
+  //   treeshake: {
+  //     moduleSideEffects: false,
+  //   },
+  // };
 
-  return [cliBundle, cliWorkerBundle];
+  return [cliBundle];
+  // return [cliBundle, cliWorkerBundle];
 }

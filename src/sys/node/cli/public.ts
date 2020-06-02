@@ -43,7 +43,7 @@ export interface CliInitOptions {
 }
 
 /**
- * Runs individual tasks giving a NodeJS `process`, Stencil `config`, and task command.
+ * Runs individual task commands.
  */
-export declare function runTask(process: any, config: Config, task: TaskCommand): Promise<void>;
+export declare function runTask(config: Config, task: TaskCommand): Promise<void>;
 export { CompilerSystem, Config, ConfigFlags, Logger, TaskCommand };

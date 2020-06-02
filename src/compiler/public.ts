@@ -95,7 +95,6 @@ export declare const optimizeJs: (jsInput?: OptimizeJsInput) => Promise<Optimize
 
 /**
  * Utility of the `path` API providied by NodeJS, but capable of running in any environment.
- * This `path` API is only the POSIX version: https://nodejs.org/api/path.html
  */
 export declare const path: PlatformPath;
 
