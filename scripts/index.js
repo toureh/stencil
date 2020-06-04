@@ -21,7 +21,7 @@ function main() {
     const tscPath = path.join(rootDir, 'node_modules', '.bin', 'tsc');
     const tsconfig = path.join(scriptsDir, 'tsconfig.json');
     const execa = require('execa');
-    execa.sync(tscPath, ['-p', tsconfig], { cwd: scriptsDir });
+    execa.sync(tscPath, ['-p', tsconfig]);
   }
 
   const build = require(scriptsBuildJs);
