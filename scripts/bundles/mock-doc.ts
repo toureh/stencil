@@ -20,20 +20,20 @@ export async function mockDoc(opts: BuildOptions) {
   writePkgJson(opts, outputDir, {
     name: '@stencil/core/mock-doc',
     description: 'Mock window, document and DOM outside of a browser environment.',
-    main: 'index.js',
-    module: 'index.mjs',
+    main: 'index.cjs.js',
+    module: 'index.js',
     types: 'index.d.ts',
   });
 
   const esOutput: OutputOptions = {
     format: 'es',
-    file: join(outputDir, 'index.mjs'),
+    file: join(outputDir, 'index.js'),
     preferConst: true,
   };
 
   const cjsOutput: OutputOptions = {
     format: 'cjs',
-    file: join(outputDir, 'index.js'),
+    file: join(outputDir, 'index.cjs.js'),
     intro: CJS_INTRO,
     outro: CJS_OUTRO,
     strict: false,
