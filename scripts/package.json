@@ -1,10 +1,12 @@
 {
   "name": "stencil-scripts",
+  "private": true,
   "version": "0.0.1",
-  "description": "Build scripts",
+  "description": "Node modules only for build scripts",
   "devDependencies": {
     "@types/fs-extra": "^9.0.1",
     "@types/listr": "^0.14.2",
+    "@types/inquirer": "6.5.0",
     "@types/prompts": "^2.0.8",
     "@types/semver": "^7.2.0",
     "@types/webpack": "^4.41.17",
