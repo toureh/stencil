@@ -484,7 +484,7 @@ export const createSystem = () => {
 
   const nextTick = (cb: () => void) => tick.then(cb);
 
-  const generateContentHash = async (content: string) => {
+  const generateContentHash = async (content: string, length: number) => {
     const arrayBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(content));
     const hashArray = Array.from(new Uint8Array(arrayBuffer)); // convert buffer to byte array
     let hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string

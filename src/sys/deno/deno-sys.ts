@@ -1,13 +1,39 @@
-import { CompilerSystem, SystemDetails, CompilerSystemUnlinkResults, CompilerSystemMakeDirectoryResults, CompilerSystemWriteFileResults } from '../../declarations';
+import {
+  CompilerSystem,
+  CompilerFsStats,
+  SystemDetails,
+  CompilerSystemRenameResults,
+  CompilerSystemRemoveDirectoryResults,
+  CompilerSystemUnlinkResults,
+  CompilerSystemMakeDirectoryResults,
+  CompilerSystemWriteFileResults,
+} from '../../declarations';
+import { basename, dirname, join } from 'path';
 import { normalizePath } from '@utils';
 
-export function createDenoSys(Deno: any) {
+export function createDenoSystem(d: any) {
+  let tmpDir: string = null;
+  const deno: typeof Deno = d;
   const destroys = new Set<() => Promise<void> | void>();
+
+  const osPlatform = deno.build.os;
+  const details: SystemDetails = {
+    cpuModel: deno.build.arch,
+    cpus: 1,
+    freemem() {
+      return 0;
+    },
+    platform: osPlatform === 'darwin' || osPlatform === 'linux' || osPlatform === 'windows' ? osPlatform : '',
+    release: deno.build.vendor,
+    runtime: 'deno',
+    runtimeVersion: deno.version.deno,
+    totalmem: 0,
+  };
 
   const sys: CompilerSystem = {
     async access(p) {
       try {
-        await Deno.stat(p);
+        await deno.stat(p);
         return true;
       } catch (e) {
         return false;
@@ -15,7 +41,7 @@ export function createDenoSys(Deno: any) {
     },
     accessSync(p) {
       try {
-        Deno.statSync(p);
+        deno.statSync(p);
         return true;
       } catch (e) {
         return false;
@@ -29,7 +55,7 @@ export function createDenoSys(Deno: any) {
     },
     async copyFile(src, dst) {
       try {
-        await Deno.copyFile(src, dst);
+        await deno.copyFile(src, dst);
         return true;
       } catch (e) {
         return false;
@@ -54,17 +80,17 @@ export function createDenoSys(Deno: any) {
       return Buffer.from(str).toString('base64');
     },
     exit(exitCode) {
-      Deno.exit(exitCode);
+      deno.exit(exitCode);
     },
     getCurrentDirectory() {
-      return normalizePath(Deno.cwd());
+      return normalizePath(deno.cwd());
     },
     glob(_pattern, _opts) {
       return null;
     },
     async isSymbolicLink(p) {
       try {
-        const stat = await Deno.stat(p);
+        const stat = await deno.stat(p);
         return stat.isSymlink;
       } catch (e) {
         return false;
@@ -73,181 +99,184 @@ export function createDenoSys(Deno: any) {
     getCompilerExecutingPath: null,
     normalizePath,
     async mkdir(p, opts) {
-      await Deno.mkdir(p, opts);
-      return new Promise(resolve => {
-        if (opts) {
-          fs.mkdir(p, opts, err => {
-            resolve({
-              basename: path.basename(p),
-              dirname: path.dirname(p),
-              path: p,
-              newDirs: [],
-              error: err,
-            });
-          });
-        } else {
-          fs.mkdir(p, err => {
-            resolve({
-              basename: path.basename(p),
-              dirname: path.dirname(p),
-              path: p,
-              newDirs: [],
-              error: err,
-            });
-          });
-        }
-      });
-    },
-    mkdirSync(p, opts) {
       const results: CompilerSystemMakeDirectoryResults = {
-        basename: path.basename(p),
-        dirname: path.dirname(p),
+        basename: basename(p),
+        dirname: dirname(p),
         path: p,
         newDirs: [],
         error: null,
       };
       try {
-        fs.mkdirSync(p, opts);
+        await deno.mkdir(p, opts);
       } catch (e) {
         results.error = e;
       }
       return results;
     },
-    readdir(p) {
-      return new Promise(resolve => {
-        fs.readdir(p, (err, files) => {
-          if (err) {
-            resolve([]);
-          } else {
-            resolve(
-              files.map(f => {
-                return normalizePath(path.join(p, f));
-              }),
-            );
-          }
-        });
-      });
+    mkdirSync(p, opts) {
+      const results: CompilerSystemMakeDirectoryResults = {
+        basename: basename(p),
+        dirname: dirname(p),
+        path: p,
+        newDirs: [],
+        error: null,
+      };
+      try {
+        deno.mkdirSync(p, opts);
+      } catch (e) {
+        results.error = e;
+      }
+      return results;
+    },
+    async readdir(p) {
+      const dirEntries: string[] = [];
+      try {
+        for await (const dirEntry of deno.readDir(p)) {
+          dirEntries.push(normalizePath(join(p, dirEntry.name)));
+        }
+      } catch (e) {}
+      return dirEntries;
     },
     readdirSync(p) {
+      const dirEntries: string[] = [];
       try {
-        return fs.readdirSync(p).map(f => {
-          return normalizePath(path.join(p, f));
-        });
+        for (const dirEntry of deno.readDirSync(p)) {
+          dirEntries.push(normalizePath(join(p, dirEntry.name)));
+        }
       } catch (e) {}
-      return [];
+      return dirEntries;
     },
-    readFile(p) {
-      return new Promise(resolve => {
-        fs.readFile(p, 'utf8', (_, data) => {
-          resolve(data);
-        });
-      });
+    async readFile(p) {
+      try {
+        const decoder = new TextDecoder('utf-8');
+        const data = await deno.readFile(p);
+        return decoder.decode(data);
+      } catch (e) {}
+      return undefined;
     },
     readFileSync(p) {
       try {
-        return fs.readFileSync(p, 'utf8');
+        const decoder = new TextDecoder('utf-8');
+        const data = deno.readFileSync(p);
+        return decoder.decode(data);
       } catch (e) {}
       return undefined;
     },
     realpath(p) {
-      return new Promise(resolve => {
-        fs.realpath(p, 'utf8', (_, data) => {
-          resolve(data);
-        });
-      });
+      try {
+        return deno.realPath(p);
+      } catch (e) {}
+      return undefined;
     },
     realpathSync(p) {
       try {
-        return fs.realpathSync(p, 'utf8');
+        return deno.realPathSync(p);
       } catch (e) {}
       return undefined;
     },
-    rename(oldPath, newPath) {
-      return new Promise(resolve => {
-        fs.rename(oldPath, newPath, error => {
-          resolve({ oldPath, newPath, error, oldDirs: [], oldFiles: [], newDirs: [], newFiles: [], renamed: [], isFile: false, isDirectory: false });
-        });
-      });
-    },
-    resolvePath(p) {
-      return normalizePath(p);
-    },
-    rmdir(p, opts) {
-      return new Promise(resolve => {
-        const recursive = !!(opts && opts.recursive);
-        if (recursive) {
-          fs.rmdir(p, { recursive: true }, err => {
-            resolve({ basename: path.basename(p), dirname: path.dirname(p), path: p, removedDirs: [], removedFiles: [], error: err });
-          });
-        } else {
-          fs.rmdir(p, err => {
-            resolve({ basename: path.basename(p), dirname: path.dirname(p), path: p, removedDirs: [], removedFiles: [], error: err });
-          });
-        }
-      });
-    },
-    rmdirSync(p, opts) {
-      try {
-        const recursive = !!(opts && opts.recursive);
-        if (recursive) {
-          fs.rmdirSync(p, { recursive: true });
-        } else {
-          fs.rmdirSync(p);
-        }
-        return { basename: path.basename(p), dirname: path.dirname(p), path: p, removedDirs: [], removedFiles: [], error: null };
-      } catch (e) {
-        return { basename: path.basename(p), dirname: path.dirname(p), path: p, removedDirs: [], removedFiles: [], error: e };
-      }
-    },
-    stat(p) {
-      return new Promise(resolve => {
-        fs.stat(p, (err, s) => {
-          if (err) {
-            resolve(undefined);
-          } else {
-            resolve(s);
-          }
-        });
-      });
-    },
-    statSync(p) {
-      try {
-        return fs.statSync(p);
-      } catch (e) {}
-      return undefined;
-    },
-    unlink(p) {
-      return new Promise(resolve => {
-        fs.unlink(p, err => {
-          resolve({
-            basename: path.basename(p),
-            dirname: path.dirname(p),
-            path: p,
-            error: err,
-          });
-        });
-      });
-    },
-    unlinkSync(p) {
-      const results: CompilerSystemUnlinkResults = {
-        basename: path.basename(p),
-        dirname: path.dirname(p),
-        path: p,
+    async rename(oldPath, newPath) {
+      const results: CompilerSystemRenameResults = {
+        oldPath,
+        newPath,
         error: null,
+        oldDirs: [],
+        oldFiles: [],
+        newDirs: [],
+        newFiles: [],
+        renamed: [],
+        isFile: false,
+        isDirectory: false,
       };
       try {
-        fs.unlinkSync(p);
+        await deno.rename(oldPath, newPath);
       } catch (e) {
         results.error = e;
       }
       return results;
     },
-    writeFile(p, content) {
-      return new Promise(resolve => {
-        fs.writeFile(p, content, err => {
-          resolve({ path: p, error: err });
-        });
-      });
+    resolvePath(p) {
+      return normalizePath(p);
+    },
+    async rmdir(p, opts) {
+      const results: CompilerSystemRemoveDirectoryResults = { basename: basename(p), dirname: dirname(p), path: p, removedDirs: [], removedFiles: [], error: null };
+      try {
+        await deno.remove(p, opts);
+      } catch (e) {
+        results.error = e;
+      }
+      return results;
+    },
+    rmdirSync(p, opts) {
+      const results: CompilerSystemRemoveDirectoryResults = { basename: basename(p), dirname: dirname(p), path: p, removedDirs: [], removedFiles: [], error: null };
+      try {
+        deno.removeSync(p, opts);
+      } catch (e) {
+        results.error = e;
+      }
+      return results;
+    },
+    async stat(p) {
+      try {
+        const stat = await deno.stat(p);
+        const results: CompilerFsStats = { isFile: () => stat.isFile, isDirectory: () => stat.isDirectory, isSymbolicLink: () => stat.isSymlink, size: stat.size };
+        return results;
+      } catch (e) {}
+      return undefined;
+    },
+    statSync(p) {
+      try {
+        const stat = deno.statSync(p);
+        const results: CompilerFsStats = { isFile: () => stat.isFile, isDirectory: () => stat.isDirectory, isSymbolicLink: () => stat.isSymlink, size: stat.size };
+        return results;
+      } catch (e) {}
+      return undefined;
+    },
+    tmpdir() {
+      if (tmpDir == null) {
+        tmpDir = deno.makeTempDirSync();
+      }
+      return tmpDir;
+    },
+    async unlink(p) {
+      const results: CompilerSystemUnlinkResults = {
+        basename: basename(p),
+        dirname: dirname(p),
+        path: p,
+        error: null,
+      };
+      try {
+        await deno.remove(p);
+      } catch (e) {
+        results.error = e;
+      }
+      return results;
+    },
+    unlinkSync(p) {
+      const results: CompilerSystemUnlinkResults = {
+        basename: basename(p),
+        dirname: dirname(p),
+        path: p,
+        error: null,
+      };
+      try {
+        deno.removeSync(p);
+      } catch (e) {
+        results.error = e;
+      }
+      return results;
+    },
+    async writeFile(p, content) {
+      const results: CompilerSystemWriteFileResults = {
+        path: p,
+        error: null,
+      };
+      try {
+        const encoder = new TextEncoder();
+        await deno.writeFile(p, encoder.encode(content));
+      } catch (e) {
+        results.error = e;
+      }
+      return results;
     },
     writeFileSync(p, content) {
       const results: CompilerSystemWriteFileResults = {
@@ -255,62 +284,26 @@ export function createDenoSys(Deno: any) {
         error: null,
       };
       try {
-        fs.writeFileSync(p, content);
+        const encoder = new TextEncoder();
+        deno.writeFileSync(p, encoder.encode(content));
       } catch (e) {
         results.error = e;
       }
       return results;
     },
-    generateContentHash(content, length) {
-      let hash = createHash('sha1').update(content).digest('hex').toLowerCase();
-
+    async generateContentHash(content, length) {
+      crypto.subtle;
+      const arrayBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(content));
+      const hashArray = Array.from(new Uint8Array(arrayBuffer)); // convert buffer to byte array
+      let hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
       if (typeof length === 'number') {
-        hash = hash.substr(0, length);
+        hashHex = hashHex.substr(0, length);
       }
-      return Promise.resolve(hash);
+      return hashHex;
     },
     copy: nodeCopyTasks,
-    details: getDetails(),
+    details: details,
   };
-
-  const nodeResolve = new NodeResolveModule();
-
-  sys.lazyRequire = new NodeLazyRequire(nodeResolve, {
-    '@types/jest': ['24.9.1', '25.2.3'],
-    '@types/puppeteer': ['1.19.0', '2.0.1'],
-    'jest': ['24.9.0', '26.0.1'],
-    'jest-cli': ['24.9.0', '26.0.1'],
-    'pixelmatch': ['4.0.2', '4.0.2'],
-    'puppeteer': ['1.19.0', '2.1.1'],
-    'puppeteer-core': ['1.19.0', '2.1.1'],
-    'workbox-build': ['4.3.1', '4.3.1'],
-  });
 
   return sys;
 }
-
-const getDetails = () => {
-  const details: SystemDetails = {
-    cpuModel: '',
-    cpus: -1,
-    freemem() {
-      return freemem();
-    },
-    platform: '',
-    release: '',
-    runtime: 'node',
-    runtimeVersion: '',
-    tmpDir: tmpdir(),
-    totalmem: -1,
-  };
-  try {
-    const sysCpus = cpus();
-    details.cpuModel = sysCpus[0].model;
-    details.cpus = sysCpus.length;
-    details.platform = platform();
-    details.release = release();
-    details.runtimeVersion = process.version;
-    details.totalmem = totalmem();
-  } catch (e) {}
-  return details;
-};

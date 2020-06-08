@@ -1,11 +1,8 @@
 import fs from 'fs-extra';
 import { join } from 'path';
-import rollupCommonjs from '@rollup/plugin-commonjs';
-import rollupResolve from '@rollup/plugin-node-resolve';
 import { aliasPlugin } from './plugins/alias-plugin';
 import { relativePathPlugin } from './plugins/relative-path-plugin';
 import { replacePlugin } from './plugins/replace-plugin';
-import { writePkgJson } from '../utils/write-pkg-json';
 import { BuildOptions } from '../utils/options';
 import { RollupOptions } from 'rollup';
 import { prettyMinifyPlugin } from './plugins/pretty-minify';
@@ -25,7 +22,7 @@ export async function cliDeno(opts: BuildOptions) {
     input: join(inputDir, 'index.js'),
     output: {
       format: 'es',
-      file: join(outDir, 'index.mjs'),
+      file: join(outDir, 'index.js'),
       esModule: false,
       preferConst: true,
     },
@@ -35,11 +32,18 @@ export async function cliDeno(opts: BuildOptions) {
       relativePathPlugin('@stencil/core/mock-doc', '../../mock-doc/index.mjs'),
       aliasPlugin(opts),
       replacePlugin(opts),
-      rollupResolve({
-        preferBuiltins: true,
-      }),
-      rollupCommonjs(),
       prettyMinifyPlugin(opts),
+      {
+        name: 'denoCliPlugin',
+        resolveId(id) {
+          if (id === 'path') {
+            return {
+              id: 'https://deno.land/std/path/mod.ts',
+              external: true,
+            };
+          }
+        },
+      },
     ],
     treeshake: {
       moduleSideEffects: false,

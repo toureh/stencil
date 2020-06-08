@@ -24,7 +24,7 @@ export function createNodeSys(prcs: NodeJS.Process) {
     platform: osPlatform === 'darwin' || osPlatform === 'linux' ? osPlatform : osPlatform === 'win32' ? 'windows' : '',
     release: release(),
     runtime: 'node',
-    runtimeVersion: prcs.version.replace('v', ''),
+    runtimeVersion: prcs.versions.node,
     totalmem: totalmem(),
   };
 

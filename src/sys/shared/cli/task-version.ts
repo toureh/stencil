@@ -1,7 +1,7 @@
 import * as d from '../../../declarations';
 import { isString, noop } from '@utils';
+import { join } from 'path';
 import { request } from 'https';
-import path from 'path';
 import semiver from 'semiver';
 
 const REGISTRY_URL = `https://registry.npmjs.org/@stencil/core`;
@@ -110,7 +110,7 @@ async function setLastCheck(config: d.Config) {
 }
 
 function getLastCheckStoragePath(config: d.Config) {
-  return path.join(config.sys.tmpdir(), 'stencil_last_version_check.json');
+  return join(config.sys.tmpdir(), 'stencil_last_version_check.json');
 }
 
 function printUpdateMessage(config: d.Config, currentVersion: string, latestVersion: string) {

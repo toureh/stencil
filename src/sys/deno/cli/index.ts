@@ -1,6 +1,6 @@
 import { CompilerSystem, Logger } from '../../../declarations';
 import { createDenoLogger } from '../deno-logger';
-import { createDenoSysWithWatch } from '../deno-sys-watch';
+import { createDenoSystem } from '../deno-sys';
 import { join } from 'path';
 import { parseFlags } from '../../shared/cli/parse-flags';
 import { runTask } from './run-task';
@@ -12,8 +12,8 @@ export async function run(init: CliInitOptions) {
   if (!init) {
     throw new Error('cli missing run init');
   }
-  const Deno = init.Deno;
-  if (!Deno) {
+  const deno: typeof Deno = init.Deno;
+  if (!deno) {
     throw new Error('cli run missing "Deno"');
   }
   const logger = init.logger;
@@ -26,7 +26,7 @@ export async function run(init: CliInitOptions) {
   }
 
   try {
-    const flags = parseFlags(Deno.args);
+    const flags = parseFlags(deno.args);
 
     if (flags.ci) {
       logger.enableColors(false);
@@ -58,7 +58,7 @@ export async function run(init: CliInitOptions) {
     if (validated.diagnostics.length > 0) {
       logger.printDiagnostics(validated.diagnostics);
       if (hasError(validated.diagnostics)) {
-        Deno.exit(1);
+        deno.exit(1);
       }
     }
 
@@ -66,7 +66,7 @@ export async function run(init: CliInitOptions) {
 
     await runTask(validated.config, validated.config.flags.task);
   } catch (e) {
-    Deno.exit(1);
+    deno.exit(1);
   }
 }
 
@@ -80,4 +80,4 @@ export interface CliInitOptions {
   sys?: CompilerSystem;
 }
 
-export { createDenoLogger, createDenoSysWithWatch as createDenoSystem, parseFlags, runTask };
+export { createDenoLogger, createDenoSystem, parseFlags, runTask };
