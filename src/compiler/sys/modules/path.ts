@@ -1,10 +1,5 @@
 import { PlatformPath } from '../../../declarations';
-import { getPathUtils } from '@path-utils';
-import { IS_WINDOWS_ENV, normalizePath } from '@utils';
-
-const pathUtils = getPathUtils({
-  isWindows: IS_WINDOWS_ENV,
-});
+import { IS_WINDOWS_ENV, normalizePath, pathUtils } from '@utils';
 
 const path: PlatformPath = pathUtils.path;
 

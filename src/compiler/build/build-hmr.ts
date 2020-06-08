@@ -1,8 +1,8 @@
 import * as d from '../../declarations';
-import { isGlob, normalizePath, sortBy } from '@utils';
 import { getScopeId } from '../style/scope-css';
 import { isOutputTargetWww } from '../output-targets/output-utils';
 import minimatch from 'minimatch';
+import { normalizePath, pathUtils, sortBy } from '@utils';
 import { basename } from 'path';
 
 export const generateHmr = (config: d.Config, compilerCtx: d.CompilerCtx, buildCtx: d.BuildCtx) => {
@@ -12,12 +12,7 @@ export const generateHmr = (config: d.Config, compilerCtx: d.CompilerCtx, buildC
 
   const hmr: d.HotModuleReplacement = {
     reloadStrategy: config.devServer.reloadStrategy,
-    versionId:
-      Date.now()
-        .toString()
-        .substring(6) +
-      '' +
-      Math.round(Math.random() * 89999 + 10000),
+    versionId: Date.now().toString().substring(6) + '' + Math.round(Math.random() * 89999 + 10000),
   };
 
   if (buildCtx.scriptsAdded.length > 0) {
@@ -215,7 +210,7 @@ const excludeHmrFiles = (config: d.Config, excludeHmr: string[], filesChanged: s
       .map(fileChanged => {
         let shouldExclude = false;
 
-        if (isGlob(excludeHmr)) {
+        if (pathUtils.isGlob(excludeHmr)) {
           shouldExclude = minimatch(fileChanged, excludeHmr);
         } else {
           shouldExclude = normalizePath(excludeHmr) === normalizePath(fileChanged);

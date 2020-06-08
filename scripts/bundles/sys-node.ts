@@ -1,6 +1,5 @@
 import fs from 'fs-extra';
 import { join } from 'path';
-import glob from 'glob';
 import webpack from 'webpack';
 import terser from 'terser';
 import { BuildOptions } from '../utils/options';
@@ -25,17 +24,9 @@ export async function sysNode(opts: BuildOptions) {
   await fs.copy(visualstudioVbsSrc, visualstudioVbsDesc);
 
   // copy open's xdg-open file
-  const xdgOpenSrcPath = glob.sync('xdg-open', {
-    cwd: join(opts.nodeModulesDir, 'open'),
-    absolute: true,
-  });
-
-  if (xdgOpenSrcPath.length !== 1) {
-    throw new Error(`cannot find xdg-open`);
-  }
-
+  const xdgOpenSrcPath = join(opts.nodeModulesDir, 'open', 'xdg-open');
   const xdgOpenDestPath = join(opts.output.devServerDir, 'xdg-open');
-  await fs.copy(xdgOpenSrcPath[0], xdgOpenDestPath);
+  await fs.copy(xdgOpenSrcPath, xdgOpenDestPath);
 }
 
 function bundleExternal(opts: BuildOptions, outputDir: string, cachedDir: string, entryFileName: string) {

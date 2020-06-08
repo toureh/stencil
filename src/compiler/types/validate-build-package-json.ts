@@ -1,5 +1,5 @@
 import * as d from '../../declarations';
-import { COLLECTION_MANIFEST_FILE_NAME, buildJsonFileError, isGlob, normalizePath } from '@utils';
+import { COLLECTION_MANIFEST_FILE_NAME, buildJsonFileError, normalizePath, pathUtils } from '@utils';
 import { dirname, join, relative } from 'path';
 import { getComponentsDtsTypesFilePath, isOutputTargetDistCollection, isOutputTargetDistTypes } from '../output-targets/output-utils';
 
@@ -49,7 +49,7 @@ export const validatePackageFiles = async (config: d.Config, compilerCtx: d.Comp
 
     await Promise.all(
       buildCtx.packageJson.files.map(async pkgFile => {
-        if (!isGlob(pkgFile)) {
+        if (!pathUtils.isGlob(pkgFile)) {
           const packageJsonDir = dirname(config.packageJsonFilePath);
           const absPath = join(packageJsonDir, pkgFile);
 

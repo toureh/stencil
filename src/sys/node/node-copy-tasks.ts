@@ -1,5 +1,5 @@
 import * as d from '../../declarations';
-import { buildError, catchError, flatOne, isGlob, normalizePath, unique } from '@utils';
+import { buildError, catchError, flatOne, pathUtils, normalizePath, unique } from '@utils';
 import { copyFile, mkdir, readdir, stat } from './node-fs-promisify';
 import path from 'path';
 import glob from 'glob';
@@ -46,7 +46,7 @@ export async function nodeCopyTasks(copyTasks: Required<d.CopyTask>[], srcDir: s
 }
 
 async function processGlobs(copyTask: Required<d.CopyTask>, srcDir: string): Promise<Required<d.CopyTask>[]> {
-  return isGlob(copyTask.src)
+  return pathUtils.isGlob(copyTask.src)
     ? await processGlobTask(copyTask, srcDir)
     : [
         {
