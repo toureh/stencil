@@ -107,6 +107,16 @@ export declare const path: PlatformPath;
  */
 export declare const version: string;
 
+/**
+ * Current version's emoji :)
+ */
+export declare const vermoji: string;
+
+/**
+ * Compiler's unique build ID.
+ */
+export declare const buildId: string;
+
 export {
   CompileScriptMinifyOptions,
   CompilerBuildResults,
