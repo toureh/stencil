@@ -1,7 +1,8 @@
 import { createTerminalLogger, ColorType, TerminalLoggerSys } from '../shared/terminal-logger';
+import type { Deno } from '../../../types/lib.deno';
 
 export const createDenoLogger = (d: any) => {
-  let useColors = true;
+  // let useColors = true;
   const deno: typeof Deno = d;
   const minColumns = 60;
   const maxColumns = 120;
@@ -12,8 +13,8 @@ export const createDenoLogger = (d: any) => {
 
   const emoji = (e: string) => (deno.build.os !== 'windows' ? e : '');
 
-  const enableColors = (enableClr: boolean) => {
-    useColors = enableClr;
+  const enableColors = (_enableClr: boolean) => {
+    // useColors = enableClr;
   };
 
   const getColumns = () => {

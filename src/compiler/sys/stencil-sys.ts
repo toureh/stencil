@@ -7,7 +7,6 @@ import {
   CompilerSystemMakeDirectoryResults,
   CopyResults,
   CopyTask,
-  SystemDetails,
   CompilerSystemRemoveDirectoryResults,
   CompilerSystemWriteFileResults,
   CompilerSystemRenameResults,
@@ -484,12 +483,12 @@ export const createSystem = () => {
 
   const nextTick = (cb: () => void) => tick.then(cb);
 
-  const generateContentHash = async (content: string, length: number) => {
+  const generateContentHash = async (content: string, hashLength: number) => {
     const arrayBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(content));
     const hashArray = Array.from(new Uint8Array(arrayBuffer)); // convert buffer to byte array
     let hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
-    if (typeof length === 'number') {
-      hashHex = hashHex.substr(0, length);
+    if (typeof hashLength === 'number') {
+      hashHex = hashHex.substr(0, hashLength);
     }
     return hashHex;
   };
@@ -545,8 +544,19 @@ export const createSystem = () => {
     writeFile,
     writeFileSync,
     generateContentHash,
-    createWorkerController: HAS_WEB_WORKER ? createWebWorkerMainController : null,
-    details: getDetails(),
+    createWorkerController: HAS_WEB_WORKER ? (maxConcurrentWorkers) => createWebWorkerMainController(sys, maxConcurrentWorkers) : null,
+    details: {
+      cpuModel: '',
+      cpus: -1,
+      freemem() {
+        return 0;
+      },
+      platform: '',
+      release: '',
+      runtime: 'browser',
+      runtimeVersion: '',
+      totalmem: -1,
+    },
     copy,
   };
 
@@ -563,19 +573,3 @@ interface FsItem {
   isDirectory: boolean;
   watcherCallbacks: CompilerFileWatcherCallback[];
 }
-
-const getDetails = () => {
-  const details: SystemDetails = {
-    cpuModel: '',
-    cpus: -1,
-    freemem() {
-      return 0;
-    },
-    platform: '',
-    release: '',
-    runtime: 'browser',
-    runtimeVersion: '',
-    totalmem: -1,
-  };
-  return details;
-};

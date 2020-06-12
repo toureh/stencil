@@ -7,7 +7,7 @@ export const createSysWorker = (sys: CompilerSystem, maxConcurrentWorkers: numbe
     return createWorkerContext();
   }
 
-  const workerCtrl = sys.createWorkerController(sys.getCompilerExecutingPath(), maxConcurrentWorkers);
+  const workerCtrl = sys.createWorkerController(maxConcurrentWorkers);
 
   sys.addDestory(() => workerCtrl.destroy());
 

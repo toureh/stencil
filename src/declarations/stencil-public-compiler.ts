@@ -334,7 +334,6 @@ export interface Config extends StencilConfig {
   buildAppCore?: boolean;
   buildDocs?: boolean;
   configPath?: string;
-  cwd?: string;
   writeLog?: boolean;
   devServer?: DevServerConfig;
   flags?: ConfigFlags;
@@ -830,7 +829,7 @@ export interface CompilerSystem {
   /**
    * Creates the worker controller for the current system.
    */
-  createWorkerController?(compilerPath: string, maxConcurrentWorkers: number): WorkerMainController;
+  createWorkerController?(maxConcurrentWorkers: number): WorkerMainController;
   encodeToBase64(str: string): string;
   /**
    * process.exit()
@@ -851,9 +850,13 @@ export interface CompilerSystem {
    */
   getCurrentDirectory(): string;
   /**
-   * The compiler's current executing path. Like the compiler's __filename on NodeJS or location.href in a web worker.
+   * The compiler's executing path.
    */
   getCompilerExecutingPath(): string;
+  /**
+   * The dev server's executing path.
+   */
+  getDevServerExecutingPath?(): string;
   /**
    * Gets the full url when requesting a node_module to fetch from a CDN.
    */
@@ -862,10 +865,6 @@ export interface CompilerSystem {
    * Aync glob task. Only available in NodeJS compiler system.
    */
   glob?(pattern: string, options: { cwd?: string; nodir?: boolean; [key: string]: any }): Promise<string[]>;
-  /**
-   * The "npm install @stencil/core" message
-   */
-  installMessage?(): string;
   /**
    * Tests if the path is a symbolic link or not. Always resolves a boolean. Does not throw.
    */
@@ -1596,6 +1595,12 @@ export interface Logger {
   emoji: (e: string) => string;
   setLogFilePath?: (p: string) => void;
   writeLogs?: (append: boolean) => void;
+  createLineUpdater?: () => Promise<LoggerLineUpdater>;
+}
+
+export interface LoggerLineUpdater {
+  update(text: string): Promise<void>;
+  stop(): Promise<void>;
 }
 
 export interface LoggerTimeSpan {
@@ -1971,23 +1976,17 @@ export interface ResolveModuleOptions {
   packageJson?: boolean;
 }
 
-export interface PrerenderResults {
-  anchorUrls: string[];
-  diagnostics: Diagnostic[];
-  filePath: string;
+export interface PrerenderStartOptions {
+  hydrateAppFilePath: string;
+  componentGraph: BuildResultsComponentGraph;
+  srcIndexHtmlPath: string;
 }
 
-export interface PrerenderRequest {
-  baseUrl: string;
-  componentGraphPath: string;
-  devServerHostUrl: string;
-  hydrateAppFilePath: string;
-  isDebug: boolean;
-  prerenderConfigPath: string;
-  staticSite: boolean;
-  templateId: string;
-  url: string;
-  writeToFilePath: string;
+export interface PrerenderResults {
+  diagnostics: Diagnostic[];
+  urls: number;
+  duration: number;
+  average: number;
 }
 
 export interface OptimizeCssInput {
@@ -2076,4 +2075,45 @@ export interface FsWriteOptions {
   immediateWrite?: boolean;
   useCache?: boolean;
   outputTargetType?: string;
+}
+
+export interface Compiler {
+  build(): Promise<CompilerBuildResults>;
+  createWatcher(): Promise<CompilerWatcher>;
+  destroy(): Promise<void>;
+  sys: CompilerSystem;
+}
+
+export interface CompilerWatcher extends BuildOnEvents {
+  start(): Promise<WatcherCloseResults>;
+  close(): Promise<WatcherCloseResults>;
+  request(data: CompilerRequest): Promise<CompilerRequestResponse>;
+}
+
+export interface CompilerRequest {
+  path?: string;
+}
+
+export interface WatcherCloseResults {
+  exitCode: number;
+}
+
+export interface CompilerRequestResponse {
+  nodeModuleId: string;
+  nodeModuleVersion: string;
+  nodeResolvedPath: string;
+  cachePath: string;
+  cacheHit: boolean;
+  content: string;
+  status: number;
+}
+
+export interface DevServer extends BuildEmitEvents {
+  address: string;
+  basePath: string;
+  browserUrl: string;
+  protocol: string;
+  port: number;
+  root: string;
+  close(): Promise<void>;
 }

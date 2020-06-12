@@ -7,5 +7,6 @@ export const createWorkerMainContext = (workerCtrl: WorkerMainController): Compi
     transformCssToEsm: workerCtrl.handler('transformCssToEsm'),
     transpileToEs5: workerCtrl.handler('transpileToEs5'),
     prepareModule: workerCtrl.handler('prepareModule'),
+    prerenderWorker: workerCtrl.handler('prerenderWorker'),
   };
 };

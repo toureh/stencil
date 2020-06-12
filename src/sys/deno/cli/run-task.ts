@@ -1,12 +1,12 @@
 import { Config, TaskCommand } from '../../../declarations';
 import { taskBuild } from './task-build';
-import { taskDocs } from '../../shared/cli/task-docs';
+import { taskDocs } from './task-docs';
 import { taskGenerate } from './task-generate';
-import { taskHelp } from '../../shared/cli/task-help';
+import { taskHelp } from './task-help';
 import { taskPrerender } from './task-prerender';
 import { taskServe } from './task-serve';
-import { taskTest } from '../../shared/cli/task-test';
-import { taskVersion } from '../../shared/cli/task-version';
+import { taskTest } from './task-test';
+import { taskVersion } from './task-version';
 
 export async function runTask(config: Config, task: TaskCommand) {
   switch (task) {

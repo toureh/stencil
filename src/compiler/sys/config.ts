@@ -1,12 +1,12 @@
 import * as d from '../../declarations';
-import { createLogger } from './logger';
+import { createBrowserLogger } from './logger/browser-logger';
 import { createSystem } from './stencil-sys';
 
 export const getConfig = (userConfig: d.Config) => {
   const config = { ...userConfig };
 
   if (!config.logger) {
-    config.logger = createLogger();
+    config.logger = createBrowserLogger();
   }
 
   if (!config.sys) {

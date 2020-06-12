@@ -1,12 +1,13 @@
 import { CompilerSystem, Logger } from '../../../declarations';
+import type { Deno } from '../../../../types/lib.deno';
 import { createDenoLogger } from '../deno-logger';
 import { createDenoSystem } from '../deno-sys';
 import { join } from 'path';
-import { parseFlags } from '../../shared/cli/parse-flags';
+import { parseFlags } from './parse-flags';
 import { runTask } from './run-task';
 import { hasError } from '@utils';
 import { setupWorkerController } from '../worker';
-import { taskVersion } from '../../shared/cli/task-version';
+import { taskVersion } from './task-version';
 
 export async function run(init: CliInitOptions) {
   if (!init) {

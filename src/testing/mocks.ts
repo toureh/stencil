@@ -9,17 +9,18 @@ import { TestingLogger } from './testing-logger';
 import path from 'path';
 
 export function mockConfig(sys?: CompilerSystem) {
+  const rootDir = path.resolve('/');
+
   if (!sys) {
     sys = createTestingSystem();
   }
+  sys.getCurrentDirectory = () => rootDir;
 
-  const rootDir = path.resolve('/');
   const config: Config = {
     _isTesting: true,
 
     namespace: 'Testing',
     rootDir: rootDir,
-    cwd: rootDir,
     globalScript: null,
     devMode: true,
     enableCache: false,

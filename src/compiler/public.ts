@@ -15,6 +15,8 @@ import {
   PlatformPath,
   TranspileOptions,
   TranspileResults,
+  PrerenderStartOptions,
+  PrerenderResults,
 } from '@stencil/core/internal';
 
 /**
@@ -54,6 +56,8 @@ export declare const transpileSync: (code: string, opts?: TranspileOptions) => T
  * config provided should already be created using the `loadConfig({...})` method.
  */
 export declare const createCompiler: (config: Config) => Promise<Compiler>;
+
+export declare const createPrerenderer: (config: Config) => Promise<{ start: (opts: PrerenderStartOptions) => Promise<PrerenderResults> }>;
 
 /**
  * The compiler uses a `CompilerSystem` instance to access any file system reads and writes.

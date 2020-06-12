@@ -1,5 +1,5 @@
 import { BuildOptions } from './utils/options';
-import { cliNode } from './bundles/cli-node';
+import { cli } from './bundles/cli';
 import { compiler } from './bundles/compiler';
 import { createLicense } from './license';
 import { devServer } from './bundles/dev-server';
@@ -12,7 +12,6 @@ import { sysNode } from './bundles/sys-node';
 import { testing } from './bundles/testing';
 import { validateBuild } from './test/validate-build';
 import { rollup } from 'rollup';
-import { cliDeno } from './bundles/cli-deno';
 import { denoDeps } from './bundles/deno-deps';
 
 export async function run(rootDir: string, args: string[]) {
@@ -47,7 +46,7 @@ export async function createBuild(opts: BuildOptions) {
 
   await Promise.all([denoDeps(opts), sysNode(opts)]);
 
-  const bundles = await Promise.all([cliNode(opts), compiler(opts), devServer(opts), internal(opts), mockDoc(opts), screenshot(opts), testing(opts)]);
+  const bundles = await Promise.all([cli(opts), compiler(opts), devServer(opts), internal(opts), mockDoc(opts), screenshot(opts), testing(opts)]);
 
   return bundles.flat();
 }

@@ -1,7 +1,7 @@
 import * as d from '../../../declarations';
 import { TASK_CANCELED_MSG } from '@utils';
 
-export const createWebWorkerMainController = (workerUrl: string, maxConcurrentWorkers: number): d.WorkerMainController => {
+export const createWebWorkerMainController = (sys: d.CompilerSystem, maxConcurrentWorkers: number): d.WorkerMainController => {
   let msgIds = 0;
   let isDestroyed = false;
   let isQueued = false;
@@ -46,6 +46,7 @@ export const createWebWorkerMainController = (workerUrl: string, maxConcurrentWo
 
   const createWebWorkerMain = () => {
     let worker: Worker = null;
+    const workerUrl = sys.getCompilerExecutingPath();
     const workerOpts: WorkerOptions = {
       name: `stencil.worker.${workerIds++}`,
     };

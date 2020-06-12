@@ -11,7 +11,7 @@ export function prettyMinifyPlugin(opts: BuildOptions): Plugin {
           const b = bundles[fileName] as OutputChunk;
           if (typeof b.code === 'string') {
             const minifyResults = terser.minify(b.code, {
-              compress: { hoist_vars: true, hoist_funs: true, ecma: 2018, keep_fnames: true, keep_classnames: true, module: true, arrows: true },
+              compress: { hoist_vars: true, hoist_funs: true, ecma: 2018, keep_fnames: true, keep_classnames: true, module: true, arrows: true, passes: 2 },
               output: { ecma: 2018, indent_level: 2, beautify: true, comments: false },
             });
             if (minifyResults.error) {

@@ -8,8 +8,10 @@ import path from 'path';
 import { NodeLazyRequire } from './node-lazy-require';
 import { NodeResolveModule } from './node-resolve-module';
 import exit from 'exit';
+import { NodeWorkerController } from './worker/index';
 
-export function createNodeSys(prcs: NodeJS.Process) {
+export function createNodeSys(c: { process: any }) {
+  const prcs: NodeJS.Process = c.process;
   const destroys = new Set<() => Promise<void> | void>();
   const onInterruptsCallbacks: (() => void)[] = [];
 
@@ -58,6 +60,9 @@ export function createNodeSys(prcs: NodeJS.Process) {
         });
       });
     },
+    createWorkerController(maxConcurrentWorkers) {
+      return new NodeWorkerController('stencil-compiler-worker', sys.getCompilerExecutingPath(), maxConcurrentWorkers);
+    },
     async destroy() {
       const waits: Promise<void>[] = [];
       destroys.forEach(cb => {
@@ -82,10 +87,15 @@ export function createNodeSys(prcs: NodeJS.Process) {
     getCurrentDirectory() {
       return normalizePath(prcs.cwd());
     },
+    getCompilerExecutingPath() {
+      return path.join(__dirname, '..', '..', 'compiler', 'stencil.js');
+    },
+    getDevServerExecutingPath() {
+      return path.join(__dirname, '..', '..', 'dev-server', 'index.js');
+    },
     glob: asyncGlob,
-    installMessage: () => `npm install @stencil/core`,
-    isSymbolicLink: (p: string) =>
-      new Promise<boolean>(resolve => {
+    isSymbolicLink(p: string) {
+      return new Promise<boolean>(resolve => {
         try {
           fs.lstat(p, (err, stats) => {
             if (err) {
@@ -97,8 +107,8 @@ export function createNodeSys(prcs: NodeJS.Process) {
         } catch (e) {
           resolve(false);
         }
-      }),
-    getCompilerExecutingPath: null,
+      });
+    },
     mkdir(p, opts) {
       return new Promise(resolve => {
         if (opts) {

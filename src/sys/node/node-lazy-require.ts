@@ -1,7 +1,7 @@
 import * as d from '../../declarations';
-import { dirname } from 'path';
+import path from 'path';
 import { NodeResolveModule } from './node-resolve-module';
-import { readFile } from 'graceful-fs';
+import { readFile } from './node-fs-promisify';
 import { SpawnOptions, spawn } from 'child_process';
 import semiver from 'semiver';
 
@@ -32,7 +32,7 @@ export class NodeLazyRequire implements d.LazyRequire {
         if (semiver(installedPkgJson.version, minVersion) >= 0) {
           this.moduleData.set(ensureModuleId, {
             fromDir: fromDir,
-            modulePath: dirname(resolvedPkgJsonPath),
+            modulePath: path.dirname(resolvedPkgJsonPath),
           });
           return;
         }
@@ -90,7 +90,7 @@ export class NodeLazyRequire implements d.LazyRequire {
 
     if (!moduleData.modulePath) {
       const modulePkgJsonPath = this.nodeResolveModule.resolveModule(moduleData.fromDir, moduleId);
-      moduleData.modulePath = dirname(modulePkgJsonPath);
+      moduleData.modulePath = path.dirname(modulePkgJsonPath);
       this.moduleData.set(moduleId, moduleData);
     }
 
@@ -106,7 +106,7 @@ export class NodeLazyRequire implements d.LazyRequire {
 
     if (!moduleData.modulePath) {
       const modulePkgJsonPath = this.nodeResolveModule.resolveModule(moduleData.fromDir, moduleId);
-      moduleData.modulePath = dirname(modulePkgJsonPath);
+      moduleData.modulePath = path.dirname(modulePkgJsonPath);
       this.moduleData.set(moduleId, moduleData);
     }
 
@@ -166,20 +166,9 @@ function npmInstall(logger: d.Logger, fromDir: string, moduleIds: string[]) {
   });
 }
 
-function readPackageJson(pkgJsonPath: string) {
-  return new Promise<d.PackageJsonData>((resolve, reject) => {
-    readFile(pkgJsonPath, 'utf8', (err, data) => {
-      if (err) {
-        reject(err);
-      } else {
-        try {
-          resolve(JSON.parse(data));
-        } catch (e) {
-          reject(e);
-        }
-      }
-    });
-  });
+async function readPackageJson(pkgJsonPath: string) {
+  const data = await readFile(pkgJsonPath, 'utf8');
+  return JSON.parse(data) as d.PackageJsonData;
 }
 
 interface DepToInstall {

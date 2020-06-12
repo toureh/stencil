@@ -1,6 +1,6 @@
 import * as d from '../../../declarations';
-import { checkVersion } from '../../shared/cli/task-version';
-import { startupLog } from '../../shared/cli/startup-log';
+import { checkVersion } from './task-version';
+import { startupLog } from './startup-log';
 import { taskWatch } from './task-watch';
 
 export async function taskBuild(config: d.Config) {

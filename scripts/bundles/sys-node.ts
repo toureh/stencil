@@ -2,18 +2,26 @@ import fs from 'fs-extra';
 import { join } from 'path';
 import webpack from 'webpack';
 import terser from 'terser';
+import rollupCommonjs from '@rollup/plugin-commonjs';
+import rollupResolve from '@rollup/plugin-node-resolve';
 import { BuildOptions } from '../utils/options';
+import { RollupOptions, rollup } from 'rollup';
+import { relativePathPlugin } from './plugins/relative-path-plugin';
+import { aliasPlugin } from './plugins/alias-plugin';
+import { replacePlugin } from './plugins/replace-plugin';
+import { prettyMinifyPlugin } from './plugins/pretty-minify';
 
 export async function sysNode(opts: BuildOptions) {
   const cachedDir = join(opts.transpiledDir, 'sys-node-bundle-cache');
 
-  fs.ensureDirSync(cachedDir);
+  await fs.ensureDir(cachedDir);
 
   await Promise.all([
     bundleExternal(opts, opts.output.sysNodeDir, cachedDir, 'autoprefixer.js'),
+    bundleExternal(opts, opts.output.sysNodeDir, cachedDir, 'glob.js'),
     bundleExternal(opts, opts.output.sysNodeDir, cachedDir, 'graceful-fs.js'),
-    bundleExternal(opts, opts.output.sysNodeDir, cachedDir, 'prompts.js'),
     bundleExternal(opts, opts.output.sysNodeDir, cachedDir, 'node-fetch.js'),
+    bundleExternal(opts, opts.output.sysNodeDir, cachedDir, 'prompts.js'),
     bundleExternal(opts, opts.output.devServerDir, cachedDir, 'open-in-editor-api.js'),
     bundleExternal(opts, opts.output.devServerDir, cachedDir, 'ws.js'),
   ]);
@@ -27,6 +35,44 @@ export async function sysNode(opts: BuildOptions) {
   const xdgOpenSrcPath = join(opts.nodeModulesDir, 'open', 'xdg-open');
   const xdgOpenDestPath = join(opts.output.devServerDir, 'xdg-open');
   await fs.copy(xdgOpenSrcPath, xdgOpenDestPath);
+
+  await bundleSysNodeIndex(opts);
+}
+
+async function bundleSysNodeIndex(opts: BuildOptions) {
+  const inputFile = join(opts.transpiledDir, 'sys', 'node', 'index.js');
+  const outputFile = join(opts.output.sysNodeDir, 'index.js');
+
+  const sysNodeBundle: RollupOptions = {
+    input: inputFile,
+    external: ['child_process', 'crypto', 'events', 'https', 'path', 'readline', 'os', 'util'],
+    plugins: [
+      relativePathPlugin('glob', './glob.js'),
+      relativePathPlugin('graceful-fs', './graceful-fs.js'),
+      relativePathPlugin('prompts', './prompts.js'),
+      aliasPlugin(opts),
+      replacePlugin(opts),
+      rollupResolve({
+        preferBuiltins: true,
+      }),
+      rollupCommonjs({
+        transformMixedEsModules: false,
+      }),
+      prettyMinifyPlugin(opts),
+    ],
+    treeshake: {
+      moduleSideEffects: false,
+      propertyReadSideEffects: false,
+      unknownGlobalSideEffects: false,
+    },
+  };
+
+  const build = await rollup(sysNodeBundle);
+  await build.write({
+    format: 'cjs',
+    file: outputFile,
+    preferConst: true,
+  });
 }
 
 function bundleExternal(opts: BuildOptions, outputDir: string, cachedDir: string, entryFileName: string) {

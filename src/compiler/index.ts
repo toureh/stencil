@@ -3,6 +3,7 @@ import path from './sys/modules/path';
 
 export { compile, compileSync, transpile, transpileSync } from './transpile';
 export { createCompiler } from './compiler';
+export { createPrerenderer } from './prerender/prerender-main';
 export { createSystem } from './sys/stencil-sys';
 export { createWorkerContext } from './worker/worker-thread';
 export { dependencies } from './sys/dependencies';
@@ -10,6 +11,6 @@ export { loadConfig } from './config/load-config';
 export { optimizeCss } from './optimize/optimize-css';
 export { optimizeJs } from './optimize/optimize-js';
 export { path };
-export { version } from '../version';
+export { version, vermoji, buildId } from '../version';
 
 initWorkerThread(globalThis);

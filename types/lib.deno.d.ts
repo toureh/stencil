@@ -1,9 +1,8 @@
 // Copyright 2018-2020 the Deno authors. All rights reserved. MIT license.
 
-/// <reference no-default-lib="true" />
 /// <reference lib="esnext" />
 
-declare namespace Deno {
+export namespace Deno {
   /** A set of error constructors that are raised by Deno APIs. */
   export const errors: {
     NotFound: ErrorConstructor;
@@ -321,7 +320,7 @@ declare namespace Deno {
     dst: Writer,
     options?: {
       bufSize?: number;
-    }
+    },
   ): Promise<number>;
 
   /** Turns a Reader, `r`, into an async iterator.
@@ -357,7 +356,7 @@ declare namespace Deno {
     r: Reader,
     options?: {
       bufSize?: number;
-    }
+    },
   ): AsyncIterableIterator<Uint8Array>;
 
   /** Turns a ReaderSync, `r`, into an iterator.
@@ -393,7 +392,7 @@ declare namespace Deno {
     r: ReaderSync,
     options?: {
       bufSize?: number;
-    }
+    },
   ): IterableIterator<Uint8Array>;
 
   /** Synchronously open a file and return an instance of `Deno.File`.  The
@@ -562,11 +561,7 @@ declare namespace Deno {
    * console.log(Deno.seekSync(file.rid, -2, Deno.SeekMode.End)); // "9" (e.g. 11-2)
    * ```
    */
-  export function seekSync(
-    rid: number,
-    offset: number,
-    whence: SeekMode
-  ): number;
+  export function seekSync(rid: number, offset: number, whence: SeekMode): number;
 
   /** Seek a resource ID (`rid`) to the given `offset` under mode given by `whence`.
    * The call resolves to the new position within the resource (bytes from the start).
@@ -594,11 +589,7 @@ declare namespace Deno {
    * console.log(await Deno.seek(file.rid, -2, Deno.SeekMode.End)); // "9" (e.g. 11-2)
    * ```
    */
-  export function seek(
-    rid: number,
-    offset: number,
-    whence: SeekMode
-  ): Promise<number>;
+  export function seek(rid: number, offset: number, whence: SeekMode): Promise<number>;
 
   /** Close the given resource ID (rid) which has been previously opened, such
    * as via opening or creating a file.  Closing a file when you are finished
@@ -613,15 +604,7 @@ declare namespace Deno {
   export function close(rid: number): void;
 
   /** The Deno abstraction for reading and writing files. */
-  export class File
-    implements
-      Reader,
-      ReaderSync,
-      Writer,
-      WriterSync,
-      Seeker,
-      SeekerSync,
-      Closer {
+  export class File implements Reader, ReaderSync, Writer, WriterSync, Seeker, SeekerSync, Closer {
     readonly rid: number;
     constructor(rid: number);
     write(p: Uint8Array): Promise<number>;
@@ -1437,11 +1420,7 @@ declare namespace Deno {
    * Requires `allow-write` permission, and `allow-read` if `options.create` is
    * `false`.
    */
-  export function writeFileSync(
-    path: string,
-    data: Uint8Array,
-    options?: WriteFileOptions
-  ): void;
+  export function writeFileSync(path: string, data: Uint8Array, options?: WriteFileOptions): void;
 
   /** Write `data` to the given `path`, by default creating a new file if needed,
    * else overwriting.
@@ -1457,11 +1436,7 @@ declare namespace Deno {
    *
    * Requires `allow-write` permission, and `allow-read` if `options.create` is `false`.
    */
-  export function writeFile(
-    path: string,
-    data: Uint8Array,
-    options?: WriteFileOptions
-  ): Promise<void>;
+  export function writeFile(path: string, data: Uint8Array, options?: WriteFileOptions): Promise<void>;
 
   /** Synchronously write string `data` to the given `path`, by default creating a new file if needed,
    * else overwriting.
@@ -1523,13 +1498,13 @@ declare namespace Deno {
   export function truncate(name: string, len?: number): Promise<void>;
 
   export interface NetAddr {
-    transport: "tcp" | "udp";
+    transport: 'tcp' | 'udp';
     hostname: string;
     port: number;
   }
 
   export interface UnixAddr {
-    transport: "unix" | "unixpacket";
+    transport: 'unix' | 'unixpacket';
     path: string;
   }
 
@@ -1582,9 +1557,7 @@ declare namespace Deno {
    * ```
    *
    * Requires `allow-net` permission. */
-  export function listen(
-    options: ListenOptions & { transport?: "tcp" }
-  ): Listener;
+  export function listen(options: ListenOptions & { transport?: 'tcp' }): Listener;
 
   export interface ListenTlsOptions extends ListenOptions {
     /** Server certificate file. */
@@ -1592,7 +1565,7 @@ declare namespace Deno {
     /** Server public key file. */
     keyFile: string;
 
-    transport?: "tcp";
+    transport?: 'tcp';
   }
 
   /** Listen announces on the local transport address over TLS (transport layer
@@ -1611,7 +1584,7 @@ declare namespace Deno {
     /** A literal IP address or host name that can be resolved to an IP address.
      * If not specified, defaults to `127.0.0.1`. */
     hostname?: string;
-    transport?: "tcp";
+    transport?: 'tcp';
   }
 
   /**
@@ -1711,7 +1684,7 @@ declare namespace Deno {
   export function resources(): ResourceMap;
 
   export interface FsEvent {
-    kind: "any" | "access" | "create" | "modify" | "remove";
+    kind: 'any' | 'access' | 'create' | 'modify' | 'remove';
     paths: string[];
   }
 
@@ -1733,10 +1706,7 @@ declare namespace Deno {
    *
    * Requires `allow-read` permission.
    */
-  export function watchFs(
-    paths: string | string[],
-    options?: { recursive: boolean }
-  ): AsyncIterableIterator<FsEvent>;
+  export function watchFs(paths: string | string[], options?: { recursive: boolean }): AsyncIterableIterator<FsEvent>;
 
   export class Process {
     readonly rid: number;
@@ -1789,9 +1759,9 @@ declare namespace Deno {
     env?: {
       [key: string]: string;
     };
-    stdout?: "inherit" | "piped" | "null" | number;
-    stderr?: "inherit" | "piped" | "null" | number;
-    stdin?: "inherit" | "piped" | "null" | number;
+    stdout?: 'inherit' | 'piped' | 'null' | number;
+    stderr?: 'inherit' | 'piped' | 'null' | number;
+    stdin?: 'inherit' | 'piped' | 'null' | number;
   }
 
   /** Spawns new subprocess.  RunOptions must contain at a minimum the `opt.cmd`,
@@ -1871,9 +1841,9 @@ declare namespace Deno {
     /** The LLVM target triple */
     target: string;
     /** Instruction set architecture */
-    arch: "x86_64";
+    arch: 'x86_64';
     /** Operating system */
-    os: "darwin" | "linux" | "windows";
+    os: 'darwin' | 'linux' | 'windows';
     /** Computer vendor */
     vendor: string;
     /** Optional environment */
@@ -1936,32 +1906,23 @@ declare namespace WebAssembly {
    * `ArrayBuffer`, and performs both compilation and instantiation in one step.
    * The returned `Promise` resolves to both a compiled `WebAssembly.Module` and
    * its first `WebAssembly.Instance`. */
-  function instantiate(
-    bufferSource: BufferSource,
-    importObject?: object
-  ): Promise<WebAssemblyInstantiatedSource>;
+  function instantiate(bufferSource: BufferSource, importObject?: object): Promise<WebAssemblyInstantiatedSource>;
 
   /** Takes an already-compiled `WebAssembly.Module` and returns a `Promise`
    * that resolves to an `Instance` of that `Module`. This overload is useful if
    * the `Module` has already been compiled. */
-  function instantiate(
-    module: Module,
-    importObject?: object
-  ): Promise<Instance>;
+  function instantiate(module: Module, importObject?: object): Promise<Instance>;
 
   /** Compiles and instantiates a WebAssembly module directly from a streamed
    * underlying source. This is the most efficient, optimized way to load wasm
    * code. */
-  function instantiateStreaming(
-    source: Promise<Response>,
-    importObject?: object
-  ): Promise<WebAssemblyInstantiatedSource>;
+  function instantiateStreaming(source: Promise<Response>, importObject?: object): Promise<WebAssemblyInstantiatedSource>;
 
   /** Validates a given typed array of WebAssembly binary code, returning
    * whether the bytes form a valid wasm module (`true`) or not (`false`). */
   function validate(bufferSource: BufferSource): boolean;
 
-  type ImportExportKind = "function" | "table" | "memory" | "global";
+  type ImportExportKind = 'function' | 'table' | 'memory' | 'global';
 
   interface ModuleExportDescriptor {
     name: string;
@@ -1978,10 +1939,7 @@ declare namespace WebAssembly {
 
     /** Given a `Module` and string, returns a copy of the contents of all
      * custom sections in the module with the given string name. */
-    static customSections(
-      moduleObject: Module,
-      sectionName: string
-    ): ArrayBuffer;
+    static customSections(moduleObject: Module, sectionName: string): ArrayBuffer;
 
     /** Given a `Module`, returns an array containing descriptions of all the
      * declared exports. */
@@ -2017,7 +1975,7 @@ declare namespace WebAssembly {
     grow(delta: number): number;
   }
 
-  type TableKind = "anyfunc";
+  type TableKind = 'anyfunc';
 
   interface TableDescriptor {
     element: TableKind;
@@ -2042,7 +2000,7 @@ declare namespace WebAssembly {
     set(index: number, value: (...args: any[]) => any): void;
   }
 
-  type ValueType = "i32" | "i64" | "f32" | "f64";
+  type ValueType = 'i32' | 'i64' | 'f32' | 'f64';
 
   interface GlobalDescriptor {
     value: ValueType;
@@ -2146,11 +2104,7 @@ declare var crypto: Crypto;
  *     ...
  *     dispatchEvent(new Event('unload'));
  */
-declare function addEventListener(
-  type: string,
-  callback: EventListenerOrEventListenerObject | null,
-  options?: boolean | AddEventListenerOptions | undefined
-): void;
+declare function addEventListener(type: string, callback: EventListenerOrEventListenerObject | null, options?: boolean | AddEventListenerOptions | undefined): void;
 
 /** Dispatches an event in the global scope, synchronously invoking any
  * registered event listeners for this event in the appropriate order. Returns
@@ -2167,11 +2121,7 @@ declare function dispatchEvent(event: Event): boolean;
  *     addEventListener('load', lstnr);
  *     removeEventListener('load', lstnr);
  */
-declare function removeEventListener(
-  type: string,
-  callback: EventListenerOrEventListenerObject | null,
-  options?: boolean | EventListenerOptions | undefined
-): void;
+declare function removeEventListener(type: string, callback: EventListenerOrEventListenerObject | null, options?: boolean | EventListenerOptions | undefined): void;
 
 declare interface ImportMeta {
   url: string;
@@ -2183,10 +2133,7 @@ interface DomIterable<K, V> {
   values(): IterableIterator<V>;
   entries(): IterableIterator<[K, V]>;
   [Symbol.iterator](): IterableIterator<[K, V]>;
-  forEach(
-    callback: (value: V, key: K, parent: this) => void,
-    thisArg?: any
-  ): void;
+  forEach(callback: (value: V, key: K, parent: this) => void, thisArg?: any): void;
 }
 
 interface ReadableStreamReadDoneResult<T> {
@@ -2199,9 +2146,7 @@ interface ReadableStreamReadValueResult<T> {
   value: T;
 }
 
-type ReadableStreamReadResult<T> =
-  | ReadableStreamReadValueResult<T>
-  | ReadableStreamReadDoneResult<T>;
+type ReadableStreamReadResult<T> = ReadableStreamReadValueResult<T> | ReadableStreamReadDoneResult<T>;
 
 interface ReadableStreamDefaultReader<R = any> {
   readonly closed: Promise<void>;
@@ -2225,7 +2170,7 @@ interface UnderlyingByteSource {
   cancel?: ReadableStreamErrorCallback;
   pull?: ReadableByteStreamControllerCallback;
   start?: ReadableByteStreamControllerCallback;
-  type: "bytes";
+  type: 'bytes';
 }
 
 interface UnderlyingSource<R = any> {
@@ -2282,8 +2227,7 @@ declare class CountQueuingStrategy implements QueuingStrategy {
   size(chunk: any): 1;
 }
 
-declare class ByteLengthQueuingStrategy
-  implements QueuingStrategy<ArrayBufferView> {
+declare class ByteLengthQueuingStrategy implements QueuingStrategy<ArrayBufferView> {
   constructor(options: { highWaterMark: number });
   highWaterMark: number;
   size(chunk: ArrayBufferView): number;
@@ -2306,25 +2250,17 @@ interface ReadableStream<R = any> {
       writable: WritableStream<R>;
       readable: ReadableStream<T>;
     },
-    options?: PipeOptions
+    options?: PipeOptions,
   ): ReadableStream<T>;
   pipeTo(dest: WritableStream<R>, options?: PipeOptions): Promise<void>;
   tee(): [ReadableStream<R>, ReadableStream<R>];
-  [Symbol.asyncIterator](options?: {
-    preventCancel?: boolean;
-  }): AsyncIterableIterator<R>;
+  [Symbol.asyncIterator](options?: { preventCancel?: boolean }): AsyncIterableIterator<R>;
 }
 
 declare var ReadableStream: {
   prototype: ReadableStream;
-  new (
-    underlyingSource: UnderlyingByteSource,
-    strategy?: { highWaterMark?: number; size?: undefined }
-  ): ReadableStream<Uint8Array>;
-  new <R = any>(
-    underlyingSource?: UnderlyingSource<R>,
-    strategy?: QueuingStrategy<R>
-  ): ReadableStream<R>;
+  new (underlyingSource: UnderlyingByteSource, strategy?: { highWaterMark?: number; size?: undefined }): ReadableStream<Uint8Array>;
+  new <R = any>(underlyingSource?: UnderlyingSource<R>, strategy?: QueuingStrategy<R>): ReadableStream<R>;
 };
 
 interface WritableStreamDefaultControllerCloseCallback {
@@ -2336,9 +2272,7 @@ interface WritableStreamDefaultControllerStartCallback {
 }
 
 interface WritableStreamDefaultControllerWriteCallback<W> {
-  (chunk: W, controller: WritableStreamDefaultController): void | PromiseLike<
-    void
-  >;
+  (chunk: W, controller: WritableStreamDefaultController): void | PromiseLike<void>;
 }
 
 interface WritableStreamErrorCallback {
@@ -2357,10 +2291,7 @@ interface UnderlyingSink<W = any> {
  * streaming data to a destination, known as a sink. This object comes with
  * built-in backpressure and queuing. */
 declare class WritableStream<W = any> {
-  constructor(
-    underlyingSink?: UnderlyingSink<W>,
-    strategy?: QueuingStrategy<W>
-  );
+  constructor(underlyingSink?: UnderlyingSink<W>, strategy?: QueuingStrategy<W>);
   readonly locked: boolean;
   abort(reason?: any): Promise<void>;
   close(): Promise<void>;
@@ -2390,11 +2321,7 @@ interface WritableStreamDefaultWriter<W = any> {
 }
 
 declare class TransformStream<I = any, O = any> {
-  constructor(
-    transformer?: Transformer<I, O>,
-    writableStrategy?: QueuingStrategy<I>,
-    readableStrategy?: QueuingStrategy<O>
-  );
+  constructor(transformer?: Transformer<I, O>, writableStrategy?: QueuingStrategy<I>, readableStrategy?: QueuingStrategy<O>);
   readonly readable: ReadableStream<O>;
   readonly writable: WritableStream<I>;
 }
@@ -2419,10 +2346,7 @@ interface TransformStreamDefaultControllerCallback<O> {
 }
 
 interface TransformStreamDefaultControllerTransformCallback<I, O> {
-  (
-    chunk: I,
-    controller: TransformStreamDefaultController<O>
-  ): void | PromiseLike<void>;
+  (chunk: I, controller: TransformStreamDefaultController<O>): void | PromiseLike<void>;
 }
 
 interface DOMStringList {
@@ -2446,7 +2370,7 @@ type BlobPart = BufferSource | Blob | string;
 
 interface BlobPropertyBag {
   type?: string;
-  ending?: "transparent" | "native";
+  ending?: 'transparent' | 'native';
 }
 
 /** A file-like object of immutable, raw data. Blobs represent data that isn't necessarily in a JavaScript-native format. The File interface is based on Blob, inheriting blob functionality and expanding it to support files on the user's system. */
@@ -2546,21 +2470,8 @@ declare const isConsoleInstance: unique symbol;
 
 declare interface Crypto {
   readonly subtle: null;
-  getRandomValues<
-    T extends
-      | Int8Array
-      | Int16Array
-      | Int32Array
-      | Uint8Array
-      | Uint16Array
-      | Uint32Array
-      | Uint8ClampedArray
-      | Float32Array
-      | Float64Array
-      | DataView
-      | null
-  >(
-    array: T
+  getRandomValues<T extends Int8Array | Int16Array | Int32Array | Uint8Array | Uint16Array | Uint32Array | Uint8ClampedArray | Float32Array | Float64Array | DataView | null>(
+    array: T,
   ): T;
 }
 
@@ -2630,10 +2541,7 @@ interface Headers {
   get(name: string): string | null;
   has(name: string): boolean;
   set(name: string, value: string): void;
-  forEach(
-    callbackfn: (value: string, key: string, parent: Headers) => void,
-    thisArg?: any
-  ): void;
+  forEach(callbackfn: (value: string, key: string, parent: Headers) => void, thisArg?: any): void;
 }
 
 interface Headers extends DomIterable<string, string> {
@@ -2668,10 +2576,7 @@ interface Headers extends DomIterable<string, string> {
    * this Headers object. The values are ByteString objects.
    */
   values(): IterableIterator<string>;
-  forEach(
-    callbackfn: (value: string, key: string, parent: this) => void,
-    thisArg?: any
-  ): void;
+  forEach(callbackfn: (value: string, key: string, parent: this) => void, thisArg?: any): void;
   /** The Symbol.iterator well-known symbol specifies the default
    * iterator for this Headers object
    */
@@ -2684,52 +2589,40 @@ declare const Headers: {
 };
 
 type RequestInfo = Request | string;
-type RequestCache =
-  | "default"
-  | "force-cache"
-  | "no-cache"
-  | "no-store"
-  | "only-if-cached"
-  | "reload";
-type RequestCredentials = "include" | "omit" | "same-origin";
-type RequestMode = "cors" | "navigate" | "no-cors" | "same-origin";
-type RequestRedirect = "error" | "follow" | "manual";
+type RequestCache = 'default' | 'force-cache' | 'no-cache' | 'no-store' | 'only-if-cached' | 'reload';
+type RequestCredentials = 'include' | 'omit' | 'same-origin';
+type RequestMode = 'cors' | 'navigate' | 'no-cors' | 'same-origin';
+type RequestRedirect = 'error' | 'follow' | 'manual';
 type ReferrerPolicy =
-  | ""
-  | "no-referrer"
-  | "no-referrer-when-downgrade"
-  | "origin"
-  | "origin-when-cross-origin"
-  | "same-origin"
-  | "strict-origin"
-  | "strict-origin-when-cross-origin"
-  | "unsafe-url";
-type BodyInit =
-  | Blob
-  | BufferSource
-  | FormData
-  | URLSearchParams
-  | ReadableStream<Uint8Array>
-  | string;
+  | ''
+  | 'no-referrer'
+  | 'no-referrer-when-downgrade'
+  | 'origin'
+  | 'origin-when-cross-origin'
+  | 'same-origin'
+  | 'strict-origin'
+  | 'strict-origin-when-cross-origin'
+  | 'unsafe-url';
+type BodyInit = Blob | BufferSource | FormData | URLSearchParams | ReadableStream<Uint8Array> | string;
 type RequestDestination =
-  | ""
-  | "audio"
-  | "audioworklet"
-  | "document"
-  | "embed"
-  | "font"
-  | "image"
-  | "manifest"
-  | "object"
-  | "paintworklet"
-  | "report"
-  | "script"
-  | "sharedworker"
-  | "style"
-  | "track"
-  | "video"
-  | "worker"
-  | "xslt";
+  | ''
+  | 'audio'
+  | 'audioworklet'
+  | 'document'
+  | 'embed'
+  | 'font'
+  | 'image'
+  | 'manifest'
+  | 'object'
+  | 'paintworklet'
+  | 'report'
+  | 'script'
+  | 'sharedworker'
+  | 'style'
+  | 'track'
+  | 'video'
+  | 'worker'
+  | 'xslt';
 
 interface RequestInit {
   /**
@@ -2893,13 +2786,7 @@ interface ResponseInit {
   statusText?: string;
 }
 
-type ResponseType =
-  | "basic"
-  | "cors"
-  | "default"
-  | "error"
-  | "opaque"
-  | "opaqueredirect";
+type ResponseType = 'basic' | 'cors' | 'default' | 'error' | 'opaque' | 'opaqueredirect';
 
 /** This Fetch API interface represents the response to a request. */
 interface Response extends Body {
@@ -2929,10 +2816,7 @@ declare const Response: {
  *     console.log(response.statusText); // e.g. "OK"
  *     const jsonData = await response.json();
  */
-declare function fetch(
-  input: Request | URL | string,
-  init?: RequestInit
-): Promise<Response>;
+declare function fetch(input: Request | URL | string, init?: RequestInit): Promise<Response>;
 
 /** Decodes a string of data which has been encoded using base-64 encoding.
  *
@@ -2953,10 +2837,7 @@ declare class TextDecoder {
   readonly fatal: boolean;
   /** Returns `true` if ignore BOM flag is set, and `false` otherwise. */
   readonly ignoreBOM = false;
-  constructor(
-    label?: string,
-    options?: { fatal?: boolean; ignoreBOM?: boolean }
-  );
+  constructor(label?: string, options?: { fatal?: boolean; ignoreBOM?: boolean });
   /** Returns the result of running encoding's decoder. */
   decode(input?: BufferSource, options?: { stream?: false }): string;
   readonly [Symbol.toStringTag]: string;
@@ -2964,13 +2845,10 @@ declare class TextDecoder {
 
 declare class TextEncoder {
   /** Returns "utf-8". */
-  readonly encoding = "utf-8";
+  readonly encoding = 'utf-8';
   /** Returns the result of running UTF-8's encoder. */
   encode(input?: string): Uint8Array;
-  encodeInto(
-    input: string,
-    dest: Uint8Array
-  ): { read: number; written: number };
+  encodeInto(input: string, dest: Uint8Array): { read: number; written: number };
   readonly [Symbol.toStringTag]: string;
 }
 
@@ -3054,10 +2932,7 @@ interface URLSearchParams {
    * ```
    *
    */
-  forEach(
-    callbackfn: (value: string, key: string, parent: this) => void,
-    thisArg?: any
-  ): void;
+  forEach(callbackfn: (value: string, key: string, parent: this) => void, thisArg?: any): void;
 
   /** Returns an iterator allowing to go through all keys contained
    * in this object.
@@ -3118,9 +2993,7 @@ interface URLSearchParams {
 
 declare const URLSearchParams: {
   prototype: URLSearchParams;
-  new (
-    init?: string[][] | Record<string, string> | string | URLSearchParams
-  ): URLSearchParams;
+  new (init?: string[][] | Record<string, string> | string | URLSearchParams): URLSearchParams;
   toString(): string;
 };
 
@@ -3190,7 +3063,7 @@ declare class Worker extends EventTarget {
   constructor(
     specifier: string,
     options?: {
-      type?: "classic" | "module";
+      type?: 'classic' | 'module';
       name?: string;
       /** UNSTABLE: New API. Expect many changes; most likely this
        * field will be made into an object for more granular
@@ -3235,7 +3108,7 @@ declare class Worker extends EventTarget {
        *
        */
       deno?: boolean;
-    }
+    },
   );
   postMessage(message: any, transfer: ArrayBuffer[]): void;
   postMessage(message: any, options?: PostMessageOptions): void;
@@ -3352,22 +3225,14 @@ declare class EventTarget {
    *
    * The event listener is appended to target's event listener list and is not
    * appended if it has the same type, callback, and capture. */
-  addEventListener(
-    type: string,
-    listener: EventListenerOrEventListenerObject | null,
-    options?: boolean | AddEventListenerOptions
-  ): void;
+  addEventListener(type: string, listener: EventListenerOrEventListenerObject | null, options?: boolean | AddEventListenerOptions): void;
   /** Dispatches a synthetic event event to target and returns true if either
    * event's cancelable attribute value is false or its preventDefault() method
    * was not invoked, and false otherwise. */
   dispatchEvent(event: Event): boolean;
   /** Removes the event listener in target's event listener list with the same
    * type, callback, and options. */
-  removeEventListener(
-    type: string,
-    callback: EventListenerOrEventListenerObject | null,
-    options?: EventListenerOptions | boolean
-  ): void;
+  removeEventListener(type: string, callback: EventListenerOrEventListenerObject | null, options?: EventListenerOptions | boolean): void;
   [Symbol.toStringTag]: string;
 }
 
@@ -3379,9 +3244,7 @@ interface EventListenerObject {
   handleEvent(evt: Event): void | Promise<void>;
 }
 
-declare type EventListenerOrEventListenerObject =
-  | EventListener
-  | EventListenerObject;
+declare type EventListenerOrEventListenerObject = EventListener | EventListenerObject;
 
 interface AddEventListenerOptions extends EventListenerOptions {
   once?: boolean;
@@ -3437,23 +3300,15 @@ interface AbortSignal extends EventTarget {
   addEventListener<K extends keyof AbortSignalEventMap>(
     type: K,
     listener: (this: AbortSignal, ev: AbortSignalEventMap[K]) => any,
-    options?: boolean | AddEventListenerOptions
+    options?: boolean | AddEventListenerOptions,
   ): void;
-  addEventListener(
-    type: string,
-    listener: EventListenerOrEventListenerObject,
-    options?: boolean | AddEventListenerOptions
-  ): void;
+  addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
   removeEventListener<K extends keyof AbortSignalEventMap>(
     type: K,
     listener: (this: AbortSignal, ev: AbortSignalEventMap[K]) => any,
-    options?: boolean | EventListenerOptions
+    options?: boolean | EventListenerOptions,
   ): void;
-  removeEventListener(
-    type: string,
-    listener: EventListenerOrEventListenerObject,
-    options?: boolean | EventListenerOptions
-  ): void;
+  removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
 }
 
 declare const AbortSignal: {

@@ -5,6 +5,7 @@ import { initWebWorkerThread } from '../sys/worker/web-worker-thread';
 import { IS_NODE_ENV, IS_WEB_WORKER_ENV } from '@utils';
 import { optimizeCss } from '../optimize/optimize-css';
 import { prepareModule } from '../optimize/optimize-module';
+import { prerenderWorker } from '../prerender/prerender-worker';
 import { transformCssToEsm } from '../style/css-to-esm';
 import { transpileToEs5 } from '../transpile/transpile-to-es5';
 
@@ -15,6 +16,7 @@ export const createWorkerContext = (): d.CompilerWorkerContext => {
     prepareModule,
     optimizeCss,
     transpileToEs5,
+    prerenderWorker,
   };
 };
 

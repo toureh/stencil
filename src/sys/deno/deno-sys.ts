@@ -1,7 +1,6 @@
 import {
   CompilerSystem,
   CompilerFsStats,
-  SystemDetails,
   CompilerSystemRenameResults,
   CompilerSystemRemoveDirectoryResults,
   CompilerSystemUnlinkResults,
@@ -10,25 +9,14 @@ import {
 } from '../../declarations';
 import { basename, dirname, join } from 'path';
 import { normalizePath } from '@utils';
+import type { Deno } from '../../../types/lib.deno';
+import { denoCopyTasks } from './deno-copy-tasks';
 
 export function createDenoSystem(d: any) {
   let tmpDir: string = null;
   const deno: typeof Deno = d;
   const destroys = new Set<() => Promise<void> | void>();
-
   const osPlatform = deno.build.os;
-  const details: SystemDetails = {
-    cpuModel: deno.build.arch,
-    cpus: 1,
-    freemem() {
-      return 0;
-    },
-    platform: osPlatform === 'darwin' || osPlatform === 'linux' || osPlatform === 'windows' ? osPlatform : '',
-    release: deno.build.vendor,
-    runtime: 'deno',
-    runtimeVersion: deno.version.deno,
-    totalmem: 0,
-  };
 
   const sys: CompilerSystem = {
     async access(p) {
@@ -127,6 +115,10 @@ export function createDenoSystem(d: any) {
         results.error = e;
       }
       return results;
+    },
+    nextTick(cb) {
+      // https://doc.deno.land/https/github.com/denoland/deno/releases/latest/download/lib.deno.d.ts#queueMicrotask
+      queueMicrotask(cb);
     },
     async readdir(p) {
       const dirEntries: string[] = [];
@@ -291,18 +283,34 @@ export function createDenoSystem(d: any) {
       }
       return results;
     },
-    async generateContentHash(content, length) {
-      crypto.subtle;
-      const arrayBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(content));
-      const hashArray = Array.from(new Uint8Array(arrayBuffer)); // convert buffer to byte array
-      let hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
-      if (typeof length === 'number') {
-        hashHex = hashHex.substr(0, length);
+    async generateContentHash(content) {
+      // https://github.com/denoland/deno/issues/1891
+      // https://jsperf.com/hashcodelordvlad/121
+      const len = content.length;
+      if (len === 0) return '';
+      let hash = 0;
+      for (let i = 0; i < len; i++) {
+        hash = (hash << 5) - hash + content.charCodeAt(i);
+        hash |= 0; // Convert to 32bit integer
       }
-      return hashHex;
+      if (hash < 0) {
+        hash = hash * -1;
+      }
+      return hash + '';
     },
-    copy: nodeCopyTasks,
-    details: details,
+    copy: (copyTasks, srcDir) => denoCopyTasks(deno, copyTasks, srcDir),
+    details: {
+      cpuModel: deno.build.arch,
+      cpus: 1,
+      freemem() {
+        return 0;
+      },
+      platform: osPlatform === 'darwin' || osPlatform === 'linux' || osPlatform === 'windows' ? osPlatform : '',
+      release: deno.build.vendor,
+      runtime: 'deno',
+      runtimeVersion: deno.version.deno,
+      totalmem: 0,
+    },
   };
 
   return sys;

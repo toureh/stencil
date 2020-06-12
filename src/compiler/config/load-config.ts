@@ -1,12 +1,12 @@
 import { buildError, catchError, isString, normalizePath, hasError, IS_NODE_ENV } from '@utils';
 import { CompilerSystem, Config, Diagnostic, LoadConfigInit, LoadConfigResults } from '../../declarations';
-import { createLogger } from '../sys/logger';
+import { createBrowserLogger } from '../sys/logger/browser-logger';
 import { createSystem } from '../sys/stencil-sys';
 import { dirname, isAbsolute, join, resolve } from 'path';
 import { loadTypescript } from '../sys/typescript/typescript-load';
 import { validateConfig } from './validate-config';
 import { validateTsConfig } from '../sys/typescript/typescript-config';
-import tsTypes from 'typescript';
+import type TypeScript from 'typescript';
 
 export const loadConfig = async (init: LoadConfigInit = {}) => {
   const results: LoadConfigResults = {
@@ -60,7 +60,6 @@ export const loadConfig = async (init: LoadConfigInit = {}) => {
     }
 
     results.config.sys = sys;
-    results.config.cwd = normalizePath(cwd);
 
     const validated = validateConfig(results.config);
     results.diagnostics.push(...validated.diagnostics);
@@ -78,7 +77,7 @@ export const loadConfig = async (init: LoadConfigInit = {}) => {
       results.config.logLevel = 'info';
     }
 
-    results.config.logger = init.logger || results.config.logger || createLogger();
+    results.config.logger = init.logger || results.config.logger || createBrowserLogger();
     results.config.logger.setLevel(results.config.logLevel);
 
     const loadedTs = await tsPromise;
@@ -209,14 +208,14 @@ const evaluateConfigFile = async (sys: CompilerSystem, diagnostics: Diagnostic[]
   return configFileData;
 };
 
-const transpileTypedConfig = (ts: typeof tsTypes, diagnostics: Diagnostic[], sourceText: string, filePath: string) => {
+const transpileTypedConfig = (ts: typeof TypeScript, diagnostics: Diagnostic[], sourceText: string, filePath: string) => {
   // let's transpile an awesome stencil.config.ts file into
   // a boring stencil.config.js file
   if (hasError(diagnostics)) {
     return sourceText;
   }
 
-  const opts: tsTypes.TranspileOptions = {
+  const opts: TypeScript.TranspileOptions = {
     fileName: filePath,
     compilerOptions: {
       module: ts.ModuleKind.CommonJS,
