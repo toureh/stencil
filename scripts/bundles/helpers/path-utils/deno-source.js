@@ -1,4 +1,4 @@
-import { basename, dirname, extname, isAbsolute, join, normalize, relative, resolve, sep, delimiter } from 'https://deno.land/std/path/posix.ts';
+import { basename, dirname, extname, isAbsolute, join, normalize, parse, relative, resolve, sep, delimiter } from 'https://deno.land/std/path/posix.ts';
 import {
   basename as basenameWin,
   dirname as dirnameWin,
@@ -6,13 +6,14 @@ import {
   isAbsolute as isAbsoluteWin,
   join as joinWin,
   normalize as normalizeWin,
+  parse as parseWin,
   relative as relativeWin,
   resolve as resolveWin,
   sep as sepWin,
   delimiter as delimiterWin,
 } from 'https://deno.land/std/path/win32.ts';
 
-export const posix = { basename, dirname, extname, isAbsolute, join, normalize, relative, resolve, sep, delimiter };
+export const posix = { basename, dirname, extname, isAbsolute, join, normalize, parse, relative, resolve, sep, delimiter };
 
 export const win32 = {
   basename: basenameWin,
@@ -21,6 +22,7 @@ export const win32 = {
   isAbsolute: isAbsoluteWin,
   join: joinWin,
   normalize: normalizeWin,
+  parse: parseWin,
   relative: relativeWin,
   resolve: resolveWin,
   sep: sepWin,

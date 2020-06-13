@@ -1,9 +1,9 @@
-import { createTerminalLogger, ColorType, TerminalLoggerSys } from '../shared/terminal-logger';
-import type { Deno } from '../../../types/lib.deno';
+import { createTerminalLogger, ColorType, TerminalLoggerSys } from '../../compiler/sys/logger/terminal-logger';
+import type { Deno as DenoTypes } from '../../../types/lib.deno';
 
-export const createDenoLogger = (d: any) => {
+export const createDenoLogger = (c: { Deno: any }) => {
   // let useColors = true;
-  const deno: typeof Deno = d;
+  const deno: typeof DenoTypes = c.Deno;
   const minColumns = 60;
   const maxColumns = 120;
 

@@ -8,11 +8,12 @@ import { internal } from './bundles/internal';
 import { mockDoc } from './bundles/mock-doc';
 import { release } from './release';
 import { screenshot } from './bundles/screenshot';
+import { sysDeno } from './bundles/sys-deno';
 import { sysNode } from './bundles/sys-node';
 import { testing } from './bundles/testing';
 import { validateBuild } from './test/validate-build';
 import { rollup } from 'rollup';
-import { denoDeps } from './bundles/deno-deps';
+import { pathUtils } from './bundles/path-utils';
 
 export async function run(rootDir: string, args: string[]) {
   try {
@@ -44,8 +45,9 @@ export async function createBuild(opts: BuildOptions) {
     emptyDir(opts.output.testingDir),
   ]);
 
-  await denoDeps(opts);
-  await sysNode(opts);
+  await pathUtils(opts);
+
+  await Promise.all([sysDeno(opts), sysNode(opts)]);
 
   const bundles = await Promise.all([cli(opts), compiler(opts), devServer(opts), internal(opts), mockDoc(opts), screenshot(opts), testing(opts)]);
 

@@ -1,8 +1,8 @@
 import * as d from '../../declarations';
 import type { Deno } from '../../../types/lib.deno';
-import { buildError, catchError, flatOne, pathUtils, normalizePath, unique } from '@utils';
+import { buildError, catchError, flatOne, isGlob, normalizePath, unique } from '@utils';
 import { basename, dirname, isAbsolute, join, resolve } from 'path';
-import { expandGlob } from 'https://deno.land/std/fs/mod.ts';
+import { expandGlob } from './deps';
 
 export async function denoCopyTasks(deno: typeof Deno, copyTasks: Required<d.CopyTask>[], srcDir: string) {
   const results: d.CopyResults = {
@@ -46,7 +46,7 @@ export async function denoCopyTasks(deno: typeof Deno, copyTasks: Required<d.Cop
 }
 
 async function processGlobs(copyTask: Required<d.CopyTask>, srcDir: string): Promise<Required<d.CopyTask>[]> {
-  return pathUtils.isGlob(copyTask.src)
+  return isGlob(copyTask.src)
     ? await processGlobTask(copyTask, srcDir)
     : [
         {

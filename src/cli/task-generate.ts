@@ -10,7 +10,9 @@ export async function taskGenerate(config: d.Config) {
     config.sys.exit(1);
   }
 
-  const { join, parse, relative } = await import('path');
+  const compilerPath = config.sys.getCompilerExecutingPath();
+  const coreCompiler: typeof import('@stencil/core/compiler') = await import(compilerPath);
+  const path = coreCompiler.path;
 
   if (!config.configPath) {
     config.logger.error('Please run this command in your root directory (i. e. the one containing stencil.config.ts).');
@@ -29,7 +31,7 @@ export async function taskGenerate(config: d.Config) {
   const input =
     config.flags.unknownArgs.find(arg => !arg.startsWith('-')) || ((await prompt({ name: 'tagName', type: 'text', message: 'Component tag name (dash-case):' })).tagName as string);
 
-  const { dir, base: componentName } = parse(input);
+  const { dir, base: componentName } = path.parse(input);
 
   const tagError = validateComponentTag(componentName);
   if (tagError) {
@@ -41,11 +43,11 @@ export async function taskGenerate(config: d.Config) {
 
   const testFolder = extensionsToGenerate.some(isTest) ? 'test' : '';
 
-  const outDir = join(absoluteSrcDir, 'components', dir, componentName);
-  await config.sys.mkdir(join(outDir, testFolder), { recursive: true });
+  const outDir = path.join(absoluteSrcDir, 'components', dir, componentName);
+  await config.sys.mkdir(path.join(outDir, testFolder), { recursive: true });
 
   const writtenFiles = await Promise.all(
-    extensionsToGenerate.map(extension => writeFileByExtension(config, outDir, componentName, extension, extensionsToGenerate.includes('css'))),
+    extensionsToGenerate.map(extension => writeFileByExtension(config, coreCompiler, outDir, componentName, extension, extensionsToGenerate.includes('css'))),
   ).catch(error => config.logger.error(error));
 
   if (!writtenFiles) {
@@ -58,7 +60,7 @@ export async function taskGenerate(config: d.Config) {
   console.log(config.logger.bold('The following files have been generated:'));
 
   const absoluteRootDir = config.rootDir;
-  writtenFiles.map(file => console.log(`  - ${relative(absoluteRootDir, file)}`));
+  writtenFiles.map(file => console.log(`  - ${path.relative(absoluteRootDir, file)}`));
 }
 
 /**
@@ -83,12 +85,18 @@ const chooseFilesToGenerate = async () => {
 /**
  * Get a file's boilerplate by its extension and write it to disk.
  */
-const writeFileByExtension = async (config: d.Config, path: string, name: string, extension: GeneratableExtension, withCss: boolean) => {
-  const { join } = await import('path');
+const writeFileByExtension = async (
+  config: d.Config,
+  coreCompiler: typeof import('@stencil/core/compiler'),
+  path: string,
+  name: string,
+  extension: GeneratableExtension,
+  withCss: boolean,
+) => {
   if (isTest(extension)) {
-    path = join(path, 'test');
+    path = coreCompiler.path.join(path, 'test');
   }
-  const outFile = join(path, `${name}.${extension}`);
+  const outFile = coreCompiler.path.join(path, `${name}.${extension}`);
   const boilerplate = getBoilerplateByExtension(name, extension, withCss);
 
   await config.sys.writeFile(outFile, boilerplate);

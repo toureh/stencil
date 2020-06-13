@@ -8,7 +8,6 @@ import { BuildOptions } from '../utils/options';
 import { RollupOptions, rollup } from 'rollup';
 import { relativePathPlugin } from './plugins/relative-path-plugin';
 import { aliasPlugin } from './plugins/alias-plugin';
-import { replacePlugin } from './plugins/replace-plugin';
 import { prettyMinifyPlugin } from './plugins/pretty-minify';
 
 export async function sysNode(opts: BuildOptions) {
@@ -51,7 +50,6 @@ async function bundleSysNodeIndex(opts: BuildOptions) {
       relativePathPlugin('graceful-fs', './graceful-fs.js'),
       relativePathPlugin('prompts', './prompts.js'),
       aliasPlugin(opts),
-      replacePlugin(opts),
       rollupResolve({
         preferBuiltins: true,
       }),

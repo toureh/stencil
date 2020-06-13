@@ -32,6 +32,7 @@ export function getOptions(rootDir: string, inputOpts: BuildOptions = {}) {
       internalDir: join(rootDir, 'internal'),
       mockDocDir: join(rootDir, 'mock-doc'),
       screenshotDir: join(rootDir, 'screenshot'),
+      sysDenoDir: join(rootDir, 'sys', 'deno'),
       sysNodeDir: join(rootDir, 'sys', 'node'),
       testingDir: join(rootDir, 'testing'),
     },
@@ -124,6 +125,7 @@ export interface BuildOptions {
     internalDir: string;
     mockDocDir: string;
     screenshotDir: string;
+    sysDenoDir: string;
     sysNodeDir: string;
     testingDir: string;
   };

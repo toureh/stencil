@@ -6,17 +6,17 @@ import {
   CompilerSystemUnlinkResults,
   CompilerSystemMakeDirectoryResults,
   CompilerSystemWriteFileResults,
+  Logger,
 } from '../../declarations';
 import { basename, dirname, join } from 'path';
 import { normalizePath } from '@utils';
-import type { Deno } from '../../../types/lib.deno';
+import type { Deno as DenoTypes } from '../../../types/lib.deno';
 import { denoCopyTasks } from './deno-copy-tasks';
 
-export function createDenoSystem(d: any) {
+export function createDenoSys(c: { Deno: any; logger: Logger }) {
   let tmpDir: string = null;
-  const deno: typeof Deno = d;
+  const deno: typeof DenoTypes = c.Deno;
   const destroys = new Set<() => Promise<void> | void>();
-  const osPlatform = deno.build.os;
 
   const sys: CompilerSystem = {
     async access(p) {
@@ -305,7 +305,7 @@ export function createDenoSystem(d: any) {
       freemem() {
         return 0;
       },
-      platform: osPlatform === 'darwin' || osPlatform === 'linux' || osPlatform === 'windows' ? osPlatform : '',
+      platform: deno.build.os,
       release: deno.build.vendor,
       runtime: 'deno',
       runtimeVersion: deno.version.deno,
