@@ -44,7 +44,8 @@ export async function createBuild(opts: BuildOptions) {
     emptyDir(opts.output.testingDir),
   ]);
 
-  await Promise.all([denoDeps(opts), sysNode(opts)]);
+  await denoDeps(opts);
+  await sysNode(opts);
 
   const bundles = await Promise.all([cli(opts), compiler(opts), devServer(opts), internal(opts), mockDoc(opts), screenshot(opts), testing(opts)]);
 

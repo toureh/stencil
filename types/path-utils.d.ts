@@ -10,17 +10,8 @@ declare module '@path-utils' {
     extname(p: string): string;
     sep: string;
     delimiter: string;
-    posix: any;
-    win32: any;
-  }
-
-  export interface GlobOptions {
-    extended?: boolean;
-    globstar?: boolean;
-  }
-
-  export interface GlobToRegExpOptions extends GlobOptions {
-    flags?: string;
+    posix: PlatformPath;
+    win32: PlatformPath;
   }
 
   export const getPathUtils: (pathConfig: {
@@ -30,12 +21,8 @@ declare module '@path-utils' {
       get: (key: string) => string;
     };
   }) => {
-    path: PlatformPath;
     posix: PlatformPath;
     win32: PlatformPath;
-    globToRegExp: (glob: string, opts?: GlobToRegExpOptions) => RegExp;
     isGlob: (str: string) => boolean;
-    normalizeGlob: (glob: string, opts?: GlobOptions) => string;
-    joinGlobs: (globs: string[], opts?: GlobOptions) => void;
   };
 }

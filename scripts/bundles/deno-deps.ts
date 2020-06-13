@@ -7,11 +7,13 @@ import ts from 'typescript';
 import terser from 'terser';
 
 export async function denoDeps(opts: BuildOptions) {
-  const inputFile = join(opts.bundleHelpersDir, 'path-utils-deno-source.js');
-  const outputFile = join(opts.transpiledDir, 'path-utils.js');
+  const pathUtilsDir = join(opts.bundleHelpersDir, 'path-utils');
+  const inputFile = join(pathUtilsDir, 'deno-source.js');
+  const esmFile = join(pathUtilsDir, 'path-utils.js');
+  const cjsFile = join(pathUtilsDir, 'path-utils.cjs.js');
 
   if (!opts.isProd) {
-    const exists = fs.existsSync(outputFile);
+    const exists = fs.existsSync(esmFile);
     if (exists) {
       return;
     }
@@ -28,57 +30,77 @@ export async function denoDeps(opts: BuildOptions) {
   };
 
   const build = await rollup(denoBundle);
-  const rollupOutput = await build.generate({
+  const esmOutput = await build.generate({
     format: 'cjs',
-    file: outputFile,
+    file: esmFile,
     preferConst: true,
     esModule: false,
     strict: false,
     banner,
-    intro,
+    intro: esmIntro,
     outro,
   });
 
-  let code = rollupOutput.output[0].code;
+  const esmMinifyResults = terser.minify(esmOutput.output[0].code, {
+    ecma: 2018,
+    compress: {
+      passes: 2,
+      ecma: 2018,
+      module: true,
+    },
+    output: {
+      ecma: 2018,
+    },
+  });
 
-  if (opts.isProd) {
-    const minifyResults = terser.minify(code, {
-      ecma: 2017,
-      compress: {
-        passes: 2,
-        ecma: 2017,
-      },
-      output: {
-        ecma: 2017,
-      },
-    });
-
-    if (minifyResults.error) {
-      throw minifyResults.error;
-    }
-
-    code = minifyResults.code;
-  } else {
-    const tsOutput = ts.transpileModule(code, {
-      fileName: outputFile,
-      compilerOptions: {
-        allowJs: true,
-        target: ts.ScriptTarget.ES2017,
-        module: ts.ModuleKind.ESNext,
-      },
-    });
-    if (tsOutput.diagnostics.length > 0) {
-      throw tsOutput.diagnostics;
-    }
-
-    code = tsOutput.outputText;
+  if (esmMinifyResults.error) {
+    throw esmMinifyResults.error;
   }
 
-  await fs.writeFile(outputFile, code);
+  await fs.writeFile(esmFile, esmMinifyResults.code);
+
+  const cjsOutput = await build.generate({
+    format: 'cjs',
+    file: cjsFile,
+    preferConst: true,
+    esModule: false,
+    strict: false,
+    banner,
+    intro: cjsIntro,
+    outro,
+  });
+
+  const cjsMinifyResults = terser.minify(cjsOutput.output[0].code, {
+    ecma: 2018,
+    compress: {
+      passes: 2,
+      ecma: 2018,
+      module: true,
+    },
+    output: {
+      ecma: 2018,
+    },
+  });
+
+  if (cjsMinifyResults.error) {
+    throw cjsMinifyResults.error;
+  }
+
+  await fs.writeFile(cjsFile, cjsMinifyResults.code);
 }
 
-const intro = `
+const esmIntro = `
 export const getPathUtils = (pathConfig) => {
+  const exports = {};
+  const ctx = {
+    cwd: pathConfig.cwd,
+    env: pathConfig.env,
+    isWindows: !!pathConfig.isWindows
+  };
+`;
+
+const cjsIntro = `
+exports.getPathUtils = (pathConfig) => {
   const exports = {};
   const ctx = {
     cwd: pathConfig.cwd,

@@ -2,7 +2,7 @@ import * as d from '../../declarations';
 import { getScopeId } from '../style/scope-css';
 import { isOutputTargetWww } from '../output-targets/output-utils';
 import minimatch from 'minimatch';
-import { normalizePath, pathUtils, sortBy } from '@utils';
+import { isGlob, normalizePath, sortBy } from '@utils';
 import { basename } from 'path';
 
 export const generateHmr = (config: d.Config, compilerCtx: d.CompilerCtx, buildCtx: d.BuildCtx) => {
@@ -210,7 +210,7 @@ const excludeHmrFiles = (config: d.Config, excludeHmr: string[], filesChanged: s
       .map(fileChanged => {
         let shouldExclude = false;
 
-        if (pathUtils.isGlob(excludeHmr)) {
+        if (isGlob(excludeHmr)) {
           shouldExclude = minimatch(fileChanged, excludeHmr);
         } else {
           shouldExclude = normalizePath(excludeHmr) === normalizePath(fileChanged);

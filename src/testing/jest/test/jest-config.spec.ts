@@ -1,7 +1,7 @@
 import * as d from '@stencil/core/declarations';
 import { buildJestArgv } from '../jest-config';
 import { mockConfig } from '@stencil/core/testing';
-import { parseFlags } from '@stencil/core/cli';
+import { parseFlags } from '../../../cli/parse-flags';
 import path from 'path';
 
 describe('jest-config', () => {

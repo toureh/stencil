@@ -48,7 +48,9 @@ export async function devServer(opts: BuildOptions) {
     },
     external: ['assert', 'child_process', 'fs', 'os', 'path', 'url', 'util'],
     plugins: [
+      relativePathPlugin('glob', '../sys/node/glob.js'),
       relativePathPlugin('graceful-fs', '../sys/node/graceful-fs.js'),
+      relativePathPlugin('../sys/node/node-sys.js', '../sys/node/node-sys.js'),
       aliasPlugin(opts),
       rollupResolve({
         preferBuiltins: true,
@@ -85,6 +87,8 @@ export async function devServer(opts: BuildOptions) {
       },
       relativePathPlugin('ws', './ws.js'),
       relativePathPlugin('graceful-fs', '../sys/node/graceful-fs.js'),
+      relativePathPlugin('glob', '../sys/node/glob.js'),
+      relativePathPlugin('../sys/node/node-sys.js', '../sys/node/node-sys.js'),
       aliasPlugin(opts),
       rollupResolve({
         preferBuiltins: true,

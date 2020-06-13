@@ -1,5 +1,5 @@
 import * as d from '../../../declarations';
-import { buildError, normalizePath, pathUtils } from '@utils';
+import { buildError, normalizePath, isGlob } from '@utils';
 import { canSkipAssetsCopy, getComponentAssetsCopyTasks } from './assets-copy-tasks';
 import { getDestAbsPath, getSrcAbsPath } from './local-copy-tasks';
 import { isOutputTargetCopy } from '../output-utils';
@@ -54,7 +54,7 @@ const filterCopyTasks = (config: d.Config, tasks: d.CopyTask[], changedFiles: st
   if (Array.isArray(tasks)) {
     return tasks.filter(copy => {
       let copySrc = copy.src;
-      if (pathUtils.isGlob(copySrc)) {
+      if (isGlob(copySrc)) {
         // test the glob
         copySrc = join(config.srcDir, copySrc);
         if (changedFiles.some(minimatch.filter(copySrc))) {

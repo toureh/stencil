@@ -39,7 +39,7 @@ export function aliasPlugin(opts: BuildOptions): Plugin {
         return join(opts.transpiledDir, 'utils', 'index.js');
       }
       if (id === '@path-utils') {
-        return join(opts.transpiledDir, 'path-utils.js');
+        return join(opts.bundleHelpersDir, 'path-utils', 'path-utils.js');
       }
       if (helperResolvers.has(id)) {
         return join(opts.bundleHelpersDir, `${id}.js`);

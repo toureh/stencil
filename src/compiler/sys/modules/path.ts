@@ -1,7 +1,7 @@
-import { PlatformPath } from '../../../declarations';
-import { IS_WINDOWS_ENV, normalizePath, pathUtils } from '@utils';
+import * as d from '../../../declarations';
+import { posix, win32, normalizePath, IS_WINDOWS_ENV } from '@utils';
 
-const path: PlatformPath = pathUtils.path;
+const path: d.PlatformPath = IS_WINDOWS_ENV ? win32 : posix;
 
 if (IS_WINDOWS_ENV) {
   path.normalize = (...args: string[]) => normalizePath(path.normalize.apply(path, args));
@@ -20,7 +20,6 @@ export const relative = path.relative;
 export const resolve = path.resolve;
 export const sep = path.sep;
 export const delimiter = path.delimiter;
-export const posix = path.posix;
-export const win32 = path.win32;
+export { posix, win32 } from '@utils';
 
 export default path;
