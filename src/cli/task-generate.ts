@@ -1,17 +1,16 @@
-import * as d from '../declarations';
+import type { Config } from '../declarations';
+import type { CoreCompiler } from './load-compiler';
 import { IS_NODE_ENV, validateComponentTag } from '@utils';
 
 /**
  * Task to generate component boilerplate.
  */
-export async function taskGenerate(config: d.Config) {
+export async function taskGenerate(coreCompiler: CoreCompiler, config: Config) {
   if (!IS_NODE_ENV) {
     config.logger.error(`"generate" command is currently only implemented for a NodeJS environment`);
     config.sys.exit(1);
   }
 
-  const compilerPath = config.sys.getCompilerExecutingPath();
-  const coreCompiler: typeof import('@stencil/core/compiler') = await import(compilerPath);
   const path = coreCompiler.path;
 
   if (!config.configPath) {
@@ -47,7 +46,7 @@ export async function taskGenerate(config: d.Config) {
   await config.sys.mkdir(path.join(outDir, testFolder), { recursive: true });
 
   const writtenFiles = await Promise.all(
-    extensionsToGenerate.map(extension => writeFileByExtension(config, coreCompiler, outDir, componentName, extension, extensionsToGenerate.includes('css'))),
+    extensionsToGenerate.map(extension => writeFileByExtension(coreCompiler, config, outDir, componentName, extension, extensionsToGenerate.includes('css'))),
   ).catch(error => config.logger.error(error));
 
   if (!writtenFiles) {
@@ -85,14 +84,7 @@ const chooseFilesToGenerate = async () => {
 /**
  * Get a file's boilerplate by its extension and write it to disk.
  */
-const writeFileByExtension = async (
-  config: d.Config,
-  coreCompiler: typeof import('@stencil/core/compiler'),
-  path: string,
-  name: string,
-  extension: GeneratableExtension,
-  withCss: boolean,
-) => {
+const writeFileByExtension = async (coreCompiler: CoreCompiler, config: Config, path: string, name: string, extension: GeneratableExtension, withCss: boolean) => {
   if (isTest(extension)) {
     path = coreCompiler.path.join(path, 'test');
   }

@@ -1,4 +1,4 @@
-import { Config } from '../declarations';
+import type { Config } from '../declarations';
 import { isString } from '@utils';
 
 export async function taskServe(config: Config) {

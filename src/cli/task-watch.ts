@@ -1,15 +1,14 @@
-import { Config, CheckVersion, DevServer } from '../declarations';
+import type { Config, CheckVersion, DevServer } from '../declarations';
+import type { CoreCompiler } from './load-compiler';
 import { runPrerenderTask } from './task-prerender';
 import { startupLog } from './startup-log';
 
-export async function taskWatch(config: Config, checkVersion: CheckVersion) {
+export async function taskWatch(coreCompiler: CoreCompiler, config: Config, checkVersion: CheckVersion) {
   let devServer: DevServer = null;
   let exitCode = 0;
 
   try {
-    const compilerPath = config.sys.getCompilerExecutingPath();
-    const coreCompiler: typeof import('@stencil/core/compiler') = await import(compilerPath);
-    startupLog(config, coreCompiler);
+    startupLog(coreCompiler, config);
 
     const checkVersionPromise = checkVersion ? checkVersion(config, coreCompiler.version) : null;
     const compiler = await coreCompiler.createCompiler(config);

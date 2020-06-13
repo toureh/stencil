@@ -1,5 +1,6 @@
-import { CliInitOptions } from '../declarations';
+import type { CliInitOptions } from '../declarations';
 import { hasError, shouldIgnoreError } from '@utils';
+import { loadCoreCompiler } from './load-compiler';
 import { parseFlags } from './parse-flags';
 import { taskBuild } from './task-build';
 import { taskDocs } from './task-docs';
@@ -20,18 +21,16 @@ export async function run(init: CliInitOptions) {
       logger.enableColors(false);
     }
 
+    const coreCompiler = await loadCoreCompiler(sys);
     if (flags.task === 'version' || flags.version) {
-      return taskVersion(sys);
+      return taskVersion(coreCompiler);
     }
 
     if (flags.task === 'help' || flags.help) {
       return taskHelp(sys, logger);
     }
 
-    const compilerPath = sys.getCompilerExecutingPath();
-    const { loadConfig }: typeof import('@stencil/core/compiler') = await import(compilerPath);
-
-    const validated = await loadConfig({
+    const validated = await coreCompiler.loadConfig({
       config: {
         flags,
       },
@@ -49,20 +48,20 @@ export async function run(init: CliInitOptions) {
 
     switch (flags.task) {
       case 'build':
-        await taskBuild(validated.config, checkVersion);
+        await taskBuild(coreCompiler, validated.config, checkVersion);
         break;
 
       case 'docs':
-        await taskDocs(validated.config);
+        await taskDocs(coreCompiler, validated.config);
         break;
 
       case 'generate':
       case 'g':
-        await taskGenerate(validated.config);
+        await taskGenerate(coreCompiler, validated.config);
         break;
 
       case 'prerender':
-        await taskPrerender(validated.config);
+        await taskPrerender(coreCompiler, validated.config);
         break;
 
       case 'serve':

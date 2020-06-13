@@ -84,7 +84,10 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
         return false;
       }
     },
-    getCompilerExecutingPath: null,
+    getCompilerExecutingPath() {
+      const current = new URL('../../compiler/stencil.js', import.meta.url);
+      return normalizePath(current.pathname);
+    },
     normalizePath,
     async mkdir(p, opts) {
       const results: CompilerSystemMakeDirectoryResults = {

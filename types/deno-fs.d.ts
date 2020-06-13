@@ -17,3 +17,7 @@ declare module 'https://deno.land/std/fs/mod.ts' {
     },
   ): AsyncIterableIterator<WalkEntry>;
 }
+
+declare module 'https://deno.land/std/path/mod.ts' {
+  export function isGlob(p: string): boolean;
+}

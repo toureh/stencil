@@ -1,5 +1,6 @@
-if (typeof module !== "undefined" && module.exports) {
+if (typeof module !== 'undefined' && module.exports) {
   module.exports = exports;
 }
+globalThis.stencil = exports;
 return exports;
 })({});

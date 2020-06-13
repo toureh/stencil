@@ -1,4 +1,4 @@
-import {  CompilerSystem, Logger } from '../declarations';
+import type { CompilerSystem, Logger } from '../declarations';
 
 export function taskHelp(sys: CompilerSystem, logger: Logger) {
   const p = logger.dim(sys.details.platform === 'windows' ? '>' : '$');

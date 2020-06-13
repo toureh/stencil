@@ -18,7 +18,7 @@ export async function sysDeno(opts: BuildOptions) {
         name: 'denoPath',
         resolveId(id) {
           if (id === 'path') {
-            return join(opts.transpiledDir, 'utils', 'path.js');
+            return 'https://deno.land/std/path/mod.ts';
           }
           return null;
         },

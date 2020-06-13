@@ -1,16 +1,14 @@
-import * as d from '../declarations';
+import type { Config } from '../declarations';
+import type { CoreCompiler } from './load-compiler';
 import { isOutputTargetDocs } from '../compiler/output-targets/output-utils';
 import { startupLog } from './startup-log';
 
-export async function taskDocs(config: d.Config) {
+export async function taskDocs(coreCompiler: CoreCompiler, config: Config) {
   config.devServer = null;
   config.outputTargets = config.outputTargets.filter(isOutputTargetDocs);
   config.devMode = true;
 
-  const compilerPath = config.sys.getCompilerExecutingPath();
-  const coreCompiler: typeof import('@stencil/core/compiler') = await import(compilerPath);
-
-  startupLog(config, coreCompiler);
+  startupLog(coreCompiler, config);
 
   const compiler = await coreCompiler.createCompiler(config);
   await compiler.build();

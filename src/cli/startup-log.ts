@@ -1,6 +1,7 @@
-import { Config } from '../declarations';
+import type { Config } from '../declarations';
+import type { CoreCompiler } from './load-compiler';
 
-export function startupLog(config: Config, coreCompiler: typeof import('@stencil/core/compiler')) {
+export function startupLog(coreCompiler: CoreCompiler, config: Config) {
   if (config.suppressLogs === true) {
     return;
   }

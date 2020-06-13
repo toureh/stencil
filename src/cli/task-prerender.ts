@@ -1,12 +1,10 @@
-import * as d from '../declarations';
+import type { BuildResultsComponentGraph, Config, Diagnostic } from '../declarations';
+import type { CoreCompiler } from './load-compiler';
 import { catchError } from '@utils';
 import { startupLog } from './startup-log';
 
-export async function taskPrerender(config: d.Config) {
-  const compilerPath = config.sys.getCompilerExecutingPath();
-  const coreCompiler: typeof import('@stencil/core/compiler') = await import(compilerPath);
-
-  startupLog(config, coreCompiler);
+export async function taskPrerender(coreCompiler: CoreCompiler, config: Config) {
+  startupLog(coreCompiler, config);
 
   const hydrateAppFilePath = config.flags.unknownArgs[0];
 
@@ -26,13 +24,13 @@ export async function taskPrerender(config: d.Config) {
 }
 
 export async function runPrerenderTask(
-  coreCompiler: typeof import('@stencil/core/compiler'),
-  config: d.Config,
+  coreCompiler: CoreCompiler,
+  config: Config,
   hydrateAppFilePath: string,
-  componentGraph: d.BuildResultsComponentGraph,
+  componentGraph: BuildResultsComponentGraph,
   srcIndexHtmlPath: string,
 ) {
-  const diagnostics: d.Diagnostic[] = [];
+  const diagnostics: Diagnostic[] = [];
 
   try {
     const prerenderer = await coreCompiler.createPrerenderer(config);

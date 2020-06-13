@@ -1,4 +1,4 @@
-import { Config, TestingRunOptions } from '../declarations';
+import type { Config, TestingRunOptions } from '../declarations';
 import { IS_NODE_ENV } from '@utils';
 
 export async function taskTest(config: Config) {
