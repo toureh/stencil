@@ -455,7 +455,7 @@ export interface TerminalLoggerSys {
   writeLogs: (logFilePath: string, log: string, append: boolean) => void;
 }
 
-export type ColorType = 'red' | 'green' | 'yellow' | 'blue' | 'magenta' | 'cyan' | 'gray' | 'dim' | 'bold' | 'bgRed';
+export type ColorType = 'bgRed' | 'blue' | 'bold' | 'cyan' | 'dim' | 'gray' | 'green' | 'magenta' | 'red' | 'yellow';
 
 const LOG_LEVELS = ['debug', 'info', 'warn', 'error'];
 

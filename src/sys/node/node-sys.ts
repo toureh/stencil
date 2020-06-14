@@ -3,7 +3,7 @@ import { asyncGlob, nodeCopyTasks } from './node-copy-tasks';
 import { cpus, freemem, platform, release, tmpdir, totalmem } from 'os';
 import { createHash } from 'crypto';
 import fs from 'graceful-fs';
-import { normalizePath } from '@utils';
+import { normalizePath, requireFunc } from '@utils';
 import path from 'path';
 import { NodeLazyRequire } from './node-lazy-require';
 import { NodeResolveModule } from './node-resolve-module';
@@ -79,7 +79,7 @@ export function createNodeSys(c: { process: any }) {
       destroys.clear();
     },
     dynamicImport(p) {
-      return Promise.resolve(require(p));
+      return Promise.resolve(requireFunc(p));
     },
     encodeToBase64(str) {
       return Buffer.from(str).toString('base64');

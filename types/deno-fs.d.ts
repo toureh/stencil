@@ -21,3 +21,16 @@ declare module 'https://deno.land/std/fs/mod.ts' {
 declare module 'https://deno.land/std/path/mod.ts' {
   export function isGlob(p: string): boolean;
 }
+
+declare module 'https://deno.land/std/fmt/colors.ts' {
+  export function bgRed(str: string): string;
+  export function blue(str: string): string;
+  export function bold(str: string): string;
+  export function cyan(str: string): string;
+  export function dim(str: string): string;
+  export function gray(str: string): string;
+  export function green(str: string): string;
+  export function magenta(str: string): string;
+  export function red(str: string): string;
+  export function yellow(str: string): string;
+}

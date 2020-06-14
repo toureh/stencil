@@ -60,7 +60,7 @@ const runPrerender = async (config: d.Config, hydrateAppFilePath: string, compon
     devServerConfig.logRequests = false;
     devServerConfig.reloadStrategy = null;
     const devServerPath = config.sys.getDevServerExecutingPath();
-    const { start }: typeof import('@stencil/core/dev-server') = await import(devServerPath);
+    const { start }: typeof import('@stencil/core/dev-server') = await config.sys.dynamicImport(devServerPath);
     const devServer = await start(devServerConfig, config.logger);
 
     try {
