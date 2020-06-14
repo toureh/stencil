@@ -1,7 +1,7 @@
 import * as d from '../../../declarations';
 import { basename, join, resolve } from 'path';
 import { fetchUrlSync } from '../fetch/fetch-module-sync';
-import { isBoolean, isString, IS_CASE_SENSITIVE_FILE_NAMES, IS_WEB_WORKER_ENV, noop, normalizePath } from '@utils';
+import { isBoolean, isFunction, isString, IS_CASE_SENSITIVE_FILE_NAMES, IS_WEB_WORKER_ENV, noop, normalizePath } from '@utils';
 import { isExternalUrl } from '../fetch/fetch-utils';
 import { TypeScriptModule } from './typescript-load';
 import ts from 'typescript';
@@ -52,13 +52,15 @@ export const patchTsSystemFileSystem = (config: d.Config, stencilSys: d.Compiler
   };
 
   tsSys.createDirectory = p => {
-    stencilSys.mkdirSync(p);
+    stencilSys.mkdirSync(p, { recursive: true });
   };
 
   tsSys.directoryExists = p => {
     const s = inMemoryFs.statSync(p);
     return s.isDirectory;
   };
+
+  tsSys.exit = exitCode => (isFunction(config.sys.exit) ? config.sys.exit(exitCode) : config.logger.warn(`ts exit(${exitCode})`));
 
   tsSys.fileExists = p => {
     let filePath = p;

@@ -192,7 +192,7 @@ const evaluateConfigFile = async (sys: CompilerSystem, diagnostics: Diagnostic[]
       require.extensions['.ts'] = undefined;
     } else {
       // browser environment, can't use node's require() to evaluate
-      let sourceText = sys.readFileSync(configFilePath, 'utf8');
+      let sourceText = await sys.readFile(configFilePath);
       sourceText = transpileTypedConfig(ts, diagnostics, sourceText, configFilePath);
       if (hasError(diagnostics)) {
         return configFileData;

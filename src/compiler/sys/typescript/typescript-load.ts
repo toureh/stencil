@@ -1,9 +1,13 @@
 import * as d from '../../../declarations';
-import { catchError, IS_GLOBAL_THIS_ENV, IS_NODE_ENV, IS_WEB_WORKER_ENV, isFunction, requireFunc, IS_FETCH_ENV, IS_DENO_ENV } from '@utils';
+import { catchError, IS_GLOBAL_THIS_ENV, IS_NODE_ENV, IS_WEB_WORKER_ENV, isFunction, requireFunc, IS_FETCH_ENV } from '@utils';
 import { httpFetch } from '../fetch/fetch-utils';
 import { getRemoteTypeScriptUrl } from '../dependencies';
 import { patchTsSystemUtils } from './typescript-sys';
 import ts from 'typescript';
+
+const tsCtx = {
+  tsPromise: null as Promise<TypeScriptModule>,
+};
 
 export const loadTypescript = async (sys: d.CompilerSystem, diagnostics: d.Diagnostic[], typescriptPath: string) => {
   const tsSync = loadTypescriptSync(sys, diagnostics, typescriptPath);
@@ -12,31 +16,26 @@ export const loadTypescript = async (sys: d.CompilerSystem, diagnostics: d.Diagn
   }
 
   if (IS_FETCH_ENV) {
-    const tsUrl = typescriptPath || getRemoteTypeScriptUrl(sys);
-
-    if (IS_DENO_ENV) {
-      // Deno process
-      const cdnTs = await sys.dynamicImport(tsUrl);
-      const denoTs = getLoadedTs(cdnTs, 'deno', tsUrl);
-      if (denoTs) {
-        patchImportedTsSys(denoTs, tsUrl);
-        return denoTs;
-      }
+    // browser main thread
+    if (!tsCtx.tsPromise) {
+      tsCtx.tsPromise = new Promise(async (resolve, reject) => {
+        try {
+          const tsUrl = typescriptPath || getRemoteTypeScriptUrl(sys);
+          const rsp = await httpFetch(sys, tsUrl);
+          const content = await rsp.text();
+          const getTsFunction = new Function(content + ';return ts;');
+          const fetchTs = getLoadedTs(getTsFunction(), 'fetch', tsUrl);
+          if (fetchTs) {
+            patchImportedTsSys(fetchTs, tsUrl);
+            resolve(fetchTs);
+          }
+        } catch (e) {
+          catchError(diagnostics, e);
+          reject(e);
+        }
+      });
     }
-
-    try {
-      // browser main thread
-      const rsp = await httpFetch(sys, tsUrl);
-      const content = await rsp.text();
-      const getTsFunction = new Function(content + ';return ts;');
-      const fetchTs = getLoadedTs(getTsFunction(), 'fetch', tsUrl);
-      if (fetchTs) {
-        patchImportedTsSys(fetchTs, tsUrl);
-        return fetchTs;
-      }
-    } catch (e) {
-      catchError(diagnostics, e);
-    }
+    return tsCtx.tsPromise;
   }
 
   return null;
