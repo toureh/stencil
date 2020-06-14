@@ -28,7 +28,7 @@ export function denoStdPlugin(): Plugin {
       if (id.endsWith('.ts')) {
         const output = ts.transpileModule(code, {
           compilerOptions: {
-            target: ts.ScriptTarget.ESNext,
+            target: ts.ScriptTarget.ES2018,
             module: ts.ModuleKind.ESNext,
           },
         });

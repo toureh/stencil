@@ -107,6 +107,13 @@ export declare const path: PlatformPath;
  */
 export declare const version: string;
 
+export declare const versions: {
+  stencil: string;
+  typescript: string;
+  rollup: string;
+  terser: string;
+};
+
 /**
  * Current version's emoji :)
  */

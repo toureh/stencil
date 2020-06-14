@@ -11,6 +11,6 @@ export { loadConfig } from './config/load-config';
 export { optimizeCss } from './optimize/optimize-css';
 export { optimizeJs } from './optimize/optimize-js';
 export { path };
-export { version, vermoji, buildId } from '../version';
+export { version, versions, vermoji, buildId } from '../version';
 
 initWorkerThread(globalThis);

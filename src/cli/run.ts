@@ -6,6 +6,7 @@ import { taskBuild } from './task-build';
 import { taskDocs } from './task-docs';
 import { taskGenerate } from './task-generate';
 import { taskHelp } from './task-help';
+import { taskInfo } from './task-info';
 import { taskPrerender } from './task-prerender';
 import { taskServe } from './task-serve';
 import { taskTest } from './task-test';
@@ -28,6 +29,10 @@ export async function run(init: CliInitOptions) {
 
     if (flags.task === 'help' || flags.help) {
       return taskHelp(sys, logger);
+    }
+
+    if (flags.task === 'info') {
+      return taskInfo(coreCompiler, sys, logger);
     }
 
     const validated = await coreCompiler.loadConfig({

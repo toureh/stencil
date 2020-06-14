@@ -81,7 +81,7 @@ export async function pathUtils(opts: BuildOptions) {
     outro,
   });
 
-  let cjsCode = esmOutput.output[0].code;
+  let cjsCode = cjsOutput.output[0].code;
   cjsCode = cjsCode.replace(/Deno/g, 'ctx');
 
   const cjsMinifyResults = terser.minify(cjsCode, {
@@ -89,7 +89,6 @@ export async function pathUtils(opts: BuildOptions) {
     compress: {
       passes: 2,
       ecma: 2018,
-      module: true,
     },
     output: {
       ecma: 2018,
