@@ -78,6 +78,9 @@ export function createNodeSys(c: { process: any }) {
       await Promise.all(waits);
       destroys.clear();
     },
+    dynamicImport(p) {
+      return Promise.resolve(require(p));
+    },
     encodeToBase64(str) {
       return Buffer.from(str).toString('base64');
     },

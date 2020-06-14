@@ -826,6 +826,7 @@ export interface CompilerSystem {
    * Used to destroy any listeners, file watchers or child processes.
    */
   destroy(): Promise<void>;
+  dynamicImport?(p: string): Promise<any>;
   /**
    * Creates the worker controller for the current system.
    */

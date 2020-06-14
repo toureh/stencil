@@ -38,14 +38,14 @@ if (process.argv.indexOf('--next') > -1) {
 
 var cli = require('../cli/index.cjs.js');
 var nodeApi = require('../sys/node/index.js');
-var logger = nodeApi.createNodeLogger({ process: process });
-var sys = nodeApi.createNodeSysWithWatch({ process: process });
+var nodeLogger = nodeApi.createNodeLogger({ process: process });
+var nodeSys = nodeApi.createNodeSysWithWatch({ process: process });
 
-nodeApi.setupNodeProcess({ process: process, logger: logger });
+nodeApi.setupNodeProcess({ process: process, logger: nodeLogger });
 
 cli.run({
   args: process.argv.slice(2),
-  logger: logger,
-  sys: sys,
+  logger: nodeLogger,
+  sys: nodeSys,
   checkVersion: nodeApi.checkVersion
 });

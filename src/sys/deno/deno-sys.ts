@@ -64,6 +64,9 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
       await Promise.all(waits);
       destroys.clear();
     },
+    dynamicImport(p) {
+      return import(p);
+    },
     encodeToBase64(str) {
       return Buffer.from(str).toString('base64');
     },

@@ -1,5 +1,5 @@
 import * as d from '../../../declarations';
-import { catchError, IS_GLOBAL_THIS_ENV, IS_NODE_ENV, IS_WEB_WORKER_ENV, isFunction, requireFunc, IS_FETCH_ENV } from '@utils';
+import { catchError, IS_GLOBAL_THIS_ENV, IS_NODE_ENV, IS_WEB_WORKER_ENV, isFunction, requireFunc, IS_FETCH_ENV, IS_DENO_ENV } from '@utils';
 import { httpFetch } from '../fetch/fetch-utils';
 import { getRemoteTypeScriptUrl } from '../dependencies';
 import { patchTsSystemUtils } from './typescript-sys';
@@ -12,9 +12,20 @@ export const loadTypescript = async (sys: d.CompilerSystem, diagnostics: d.Diagn
   }
 
   if (IS_FETCH_ENV) {
+    const tsUrl = typescriptPath || getRemoteTypeScriptUrl(sys);
+
+    if (IS_DENO_ENV) {
+      // Deno process
+      const cdnTs = await sys.dynamicImport(tsUrl);
+      const denoTs = getLoadedTs(cdnTs, 'deno', tsUrl);
+      if (denoTs) {
+        patchImportedTsSys(denoTs, tsUrl);
+        return denoTs;
+      }
+    }
+
     try {
       // browser main thread
-      const tsUrl = typescriptPath || getRemoteTypeScriptUrl(sys);
       const rsp = await httpFetch(sys, tsUrl);
       const content = await rsp.text();
       const getTsFunction = new Function(content + ';return ts;');
@@ -48,7 +59,7 @@ export const loadTypescriptSync = (sys: d.CompilerSystem, diagnostics: d.Diagnos
     }
 
     if (IS_NODE_ENV) {
-      // NodeJS
+      // NodeJS proces
       const nodeModuleId = typescriptPath || 'typescript';
       const nodeTs = getLoadedTs(requireFunc(nodeModuleId), 'nodejs', nodeModuleId);
       if (nodeTs) {

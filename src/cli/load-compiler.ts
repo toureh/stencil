@@ -11,7 +11,7 @@ export async function loadCoreCompiler(sys: CompilerSystem): Promise<CoreCompile
     }
   }
 
-  await import(sys.getCompilerExecutingPath());
+  await sys.dynamicImport(sys.getCompilerExecutingPath());
 
   return (globalThis as any).stencil;
 }
