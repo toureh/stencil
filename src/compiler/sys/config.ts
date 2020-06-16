@@ -1,6 +1,7 @@
 import * as d from '../../declarations';
 import { createBrowserLogger } from './logger/browser-logger';
 import { createSystem } from './stencil-sys';
+import { setPlatformPath } from '../sys/modules/path';
 
 export const getConfig = (userConfig: d.Config) => {
   const config = { ...userConfig };
@@ -12,6 +13,7 @@ export const getConfig = (userConfig: d.Config) => {
   if (!config.sys) {
     config.sys = createSystem();
   }
+  setPlatformPath(config.sys.platformPath);
 
   config.flags = config.flags || {};
   if (config.flags.debug || config.flags.verbose) {

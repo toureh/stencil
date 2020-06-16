@@ -43,9 +43,6 @@ async function bundleCompilerPlugins(opts: BuildOptions, inputDir: string) {
           if (id === 'resolve') {
             return join(opts.bundleHelpersDir, 'resolve.js');
           }
-          if (id === '@path-utils') {
-            return join(opts.transpiledDir, 'compiler', 'sys', 'path.js');
-          }
           return null;
         },
       },

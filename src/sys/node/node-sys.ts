@@ -75,7 +75,9 @@ export function createNodeSys(c: { process: any }) {
           console.error(`node sys destroy: ${e}`);
         }
       });
-      await Promise.all(waits);
+      if (waits.length > 0) {
+        await Promise.all(waits);
+      }
       destroys.clear();
     },
     dynamicImport(p) {
@@ -159,6 +161,7 @@ export function createNodeSys(c: { process: any }) {
     onProcessInterrupt(cb) {
       onInterruptsCallbacks.push(cb);
     },
+    platformPath: path,
     readdir(p) {
       return new Promise(resolve => {
         fs.readdir(p, (err, files) => {

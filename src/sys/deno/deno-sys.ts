@@ -8,7 +8,7 @@ import {
   CompilerSystemWriteFileResults,
   Logger,
 } from '../../declarations';
-import { basename, dirname, join } from 'path';
+import { basename, delimiter, dirname, extname, isAbsolute, join, normalize, parse, relative, resolve, sep, win32, posix } from './deps';
 import { normalizePath } from '@utils';
 import type { Deno as DenoTypes } from '../../../types/lib.deno';
 import { denoCopyTasks } from './deno-copy-tasks';
@@ -125,6 +125,21 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
     nextTick(cb) {
       // https://doc.deno.land/https/github.com/denoland/deno/releases/latest/download/lib.deno.d.ts#queueMicrotask
       queueMicrotask(cb);
+    },
+    platformPath: {
+      basename,
+      dirname,
+      extname,
+      isAbsolute,
+      join,
+      normalize,
+      parse,
+      relative,
+      resolve,
+      sep,
+      delimiter,
+      posix,
+      win32,
     },
     async readdir(p) {
       const dirEntries: string[] = [];
@@ -289,6 +304,60 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
       }
       return results;
     },
+    watchDirectory(p, callback, recursive) {
+      const fsWatcher = deno.watchFs(p, { recursive });
+
+      const dirWatcher = async () => {
+        for await (const fsEvent of fsWatcher) {
+          for (const fsPath of fsEvent.paths) {
+            const fileName = normalizePath(fsPath);
+
+            if (fsEvent.kind === 'create') {
+              callback(fileName, 'dirAdd');
+              sys.events.emit('dirAdd', fileName);
+            } else if (fsEvent.kind === 'modify') {
+              callback(fileName, 'fileUpdate');
+              sys.events.emit('fileUpdate', fileName);
+            } else if (fsEvent.kind === 'remove') {
+              callback(fileName, 'dirDelete');
+              sys.events.emit('dirDelete', fileName);
+            }
+          }
+        }
+      };
+      dirWatcher();
+
+      return {
+        close() {},
+      };
+    },
+    watchFile(p, callback) {
+      const fsWatcher = deno.watchFs(p, { recursive: false });
+
+      const fileWatcher = async () => {
+        for await (const fsEvent of fsWatcher) {
+          for (const fsPath of fsEvent.paths) {
+            const fileName = normalizePath(fsPath);
+
+            if (fsEvent.kind === 'create') {
+              callback(fileName, 'fileAdd');
+              sys.events.emit('fileAdd', fileName);
+            } else if (fsEvent.kind === 'modify') {
+              callback(fileName, 'fileUpdate');
+              sys.events.emit('fileUpdate', fileName);
+            } else if (fsEvent.kind === 'remove') {
+              callback(fileName, 'fileDelete');
+              sys.events.emit('fileDelete', fileName);
+            }
+          }
+        }
+      };
+      fileWatcher();
+
+      return {
+        close() {},
+      };
+    },
     async generateContentHash(content) {
       // https://github.com/denoland/deno/issues/1891
       // https://jsperf.com/hashcodelordvlad/121
@@ -318,6 +387,24 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
       totalmem: 0,
     },
   };
+
+  ((gbl: any) => {
+    gbl.Buffer = {};
+
+    const currentUrl = new URL('./', import.meta.url);
+    gbl.__filename = currentUrl.pathname;
+    gbl.__dirname = dirname(gbl.__filename);
+
+    const process = (gbl.process = gbl.process || {});
+    process.argv = [deno.execPath(), gbl.__filename, ...deno.args];
+    process.binding = () => ({});
+    process.cwd = () => deno.cwd();
+    process.chdir = (dir: string) => deno.chdir(dir);
+    process.env = {};
+    process.nextTick = (cb: () => void) => queueMicrotask(cb);
+    process.platform = deno.build.os === 'windows' ? 'win32' : deno.build.os;
+    process.version = 'v12.0.0';
+  })(globalThis);
 
   return sys;
 }

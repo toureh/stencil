@@ -2,8 +2,8 @@ import { CompilerSystem } from '../../declarations';
 import { getRemoteModuleUrl } from '../sys/fetch/fetch-utils';
 import { rollupVersion, version, terserVersion, typescriptVersion } from '../../version';
 
-export const getRemoteTypeScriptUrl = (sys: CompilerSystem) => {
-  const tsDep = dependencies.find(dep => dep.name === 'typescript');
+export const getRemoteDependencyUrl = (sys: CompilerSystem, depName: '@stencil/core' | 'typescript') => {
+  const tsDep = dependencies.find(dep => dep.name === depName);
   return getRemoteModuleUrl(sys, { moduleId: tsDep.name, version: tsDep.version, path: tsDep.main });
 };
 
@@ -22,10 +22,11 @@ export const dependencies: CompilerDependency[] = [
       'internal/stencil-public-compiler.d.ts',
       'internal/stencil-public-docs.d.ts',
       'internal/stencil-public-runtime.d.ts',
-      'internal/client/css-shim.mjs',
-      'internal/client/dom.mjs',
-      'internal/client/index.mjs',
-      'internal/client/shadow-css.mjs',
+      'internal/client/css-shim.js',
+      'internal/client/dom.js',
+      'internal/client/index.js',
+      'internal/client/patch.js',
+      'internal/client/shadow-css.js',
       'internal/client/package.json',
       'package.json',
     ],
@@ -47,6 +48,22 @@ export const dependencies: CompilerDependency[] = [
       'lib/lib.es2015.proxy.d.ts',
       'lib/lib.es2015.reflect.d.ts',
       'lib/lib.es2015.symbol.wellknown.d.ts',
+      'lib/lib.es2016.d.ts',
+      'lib/lib.es2016.array.include.d.ts',
+      'lib/lib.es2017.d.ts',
+      'lib/lib.es2017.typedarrays.d.ts',
+      'lib/lib.es2017.intl.d.ts',
+      'lib/lib.es2017.object.d.ts',
+      'lib/lib.es2017.sharedmemory.d.ts',
+      'lib/lib.es2017.string.d.ts',
+      'lib/lib.es2018.d.ts',
+      'lib/lib.es2018.asyncgenerator.d.ts',
+      'lib/lib.es2018.asynciterable.d.ts',
+      'lib/lib.es2018.promise.d.ts',
+      'lib/lib.es2018.regexp.d.ts',
+      'lib/lib.es2018.intl.d.ts',
+      'lib/lib.esnext.intl.d.ts',
+      'lib/lib.es2020.bigint.d.ts',
       'package.json',
     ],
   },

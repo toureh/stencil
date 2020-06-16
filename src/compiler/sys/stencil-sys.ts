@@ -12,7 +12,7 @@ import {
   CompilerSystemRenameResults,
   CompilerSystemUnlinkResults,
 } from '../../declarations';
-import { basename, dirname } from 'path';
+import platformPath from 'path-browserify';
 import { buildEvents } from '../events';
 import { createWebWorkerMainController } from './worker/web-worker-main';
 import { HAS_WEB_WORKER, IS_NODE_ENV, IS_WEB_WORKER_ENV, normalizePath, isRootPath } from '@utils';
@@ -25,6 +25,7 @@ export const createSystem = () => {
   const addDestory = (cb: () => void) => destroys.add(cb);
   const removeDestory = (cb: () => void) => destroys.delete(cb);
   const events = buildEvents();
+  const { basename, dirname } = platformPath;
 
   const destroy = async () => {
     const waits: Promise<void>[] = [];
@@ -523,6 +524,7 @@ export const createSystem = () => {
     mkdirSync,
     nextTick,
     normalizePath: normalize,
+    platformPath,
     readdir,
     readdirSync,
     readFile,
@@ -544,7 +546,7 @@ export const createSystem = () => {
     writeFile,
     writeFileSync,
     generateContentHash,
-    createWorkerController: HAS_WEB_WORKER ? (maxConcurrentWorkers) => createWebWorkerMainController(sys, maxConcurrentWorkers) : null,
+    createWorkerController: HAS_WEB_WORKER ? maxConcurrentWorkers => createWebWorkerMainController(sys, maxConcurrentWorkers) : null,
     details: {
       cpuModel: '',
       cpus: -1,

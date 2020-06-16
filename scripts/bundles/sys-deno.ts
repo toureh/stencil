@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { aliasPlugin } from './plugins/alias-plugin';
 import { BuildOptions } from '../utils/options';
-import { RollupOptions, rollup } from 'rollup';
+import { RollupOptions } from 'rollup';
 import { prettyMinifyPlugin } from './plugins/pretty-minify';
 import { denoStdPlugin } from './plugins/deno-std-plugin';
 
@@ -11,20 +11,12 @@ export async function sysDeno(opts: BuildOptions) {
 
   const sysNodeBundle: RollupOptions = {
     input: inputFile,
-    plugins: [
-      aliasPlugin(opts),
-      prettyMinifyPlugin(opts),
-      {
-        name: 'denoPath',
-        resolveId(id) {
-          if (id === 'path') {
-            return 'https://deno.land/std/path/mod.ts';
-          }
-          return null;
-        },
-      },
-      denoStdPlugin(),
-    ],
+    output: {
+      format: 'esm',
+      file: outputFile,
+      preferConst: true,
+    },
+    plugins: [aliasPlugin(opts), prettyMinifyPlugin(opts), denoStdPlugin()],
     treeshake: {
       moduleSideEffects: false,
       propertyReadSideEffects: false,
@@ -32,10 +24,5 @@ export async function sysDeno(opts: BuildOptions) {
     },
   };
 
-  const build = await rollup(sysNodeBundle);
-  await build.write({
-    format: 'esm',
-    file: outputFile,
-    preferConst: true,
-  });
+  return [sysNodeBundle];
 }

@@ -1,8 +1,7 @@
 import * as d from '../../declarations';
 import type { Deno } from '../../../types/lib.deno';
 import { buildError, catchError, flatOne, normalizePath, unique } from '@utils';
-import { basename, dirname, isAbsolute, join, resolve } from 'path';
-import { expandGlob, isGlob } from './deps';
+import { basename, dirname, expandGlob, isGlob, isAbsolute, join, resolve } from './deps';
 
 export async function denoCopyTasks(deno: typeof Deno, copyTasks: Required<d.CopyTask>[], srcDir: string) {
   const results: d.CopyResults = {

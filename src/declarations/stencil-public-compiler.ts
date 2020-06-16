@@ -885,6 +885,7 @@ export interface CompilerSystem {
    */
   normalizePath(p: string): string;
   onProcessInterrupt?(cb: () => void): void;
+  platformPath: PlatformPath;
   /**
    * All return paths are full normalized paths, not just the file names. Always returns an array, does not throw.
    */
@@ -958,6 +959,30 @@ export interface CompilerSystem {
    * SYNC! Does not throw.
    */
   writeFileSync(p: string, content: string): CompilerSystemWriteFileResults;
+}
+
+export interface ParsedPath {
+  root: string;
+  dir: string;
+  base: string;
+  ext: string;
+  name: string;
+}
+
+export interface PlatformPath {
+  normalize(p: string): string;
+  join(...paths: string[]): string;
+  resolve(...pathSegments: string[]): string;
+  isAbsolute(p: string): boolean;
+  relative(from: string, to: string): string;
+  dirname(p: string): string;
+  basename(p: string, ext?: string): string;
+  extname(p: string): string;
+  parse(p: string): ParsedPath;
+  sep: string;
+  delimiter: string;
+  posix: any;
+  win32: any;
 }
 
 export interface ResolveModuleIdOptions {

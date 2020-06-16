@@ -18,7 +18,6 @@ export const validateTsConfig = async (ts: typeof TypeScript, config: d.Config, 
       diagnostic.messageText = `Unable to load TypeScript config file. Please create a "tsconfig.json" file within the "${config.rootDir}" directory.`;
     } else {
       tsconfig.path = readTsConfig.path;
-      console.log(ts.sys);
       const host: TypeScript.ParseConfigFileHost = {
         ...ts.sys,
         readFile: p => {

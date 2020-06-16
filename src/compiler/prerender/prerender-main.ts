@@ -62,6 +62,7 @@ const runPrerender = async (config: d.Config, hydrateAppFilePath: string, compon
     const devServerPath = config.sys.getDevServerExecutingPath();
     const { start }: typeof import('@stencil/core/dev-server') = await config.sys.dynamicImport(devServerPath);
     const devServer = await start(devServerConfig, config.logger);
+    config.sys.addDestory(() => devServer.close());
 
     try {
       await Promise.all(
@@ -72,8 +73,6 @@ const runPrerender = async (config: d.Config, hydrateAppFilePath: string, compon
     } catch (e) {
       catchError(diagnostics, e);
     }
-
-    await devServer.close();
   }
 
   results.duration = Date.now() - startTime;
@@ -81,6 +80,7 @@ const runPrerender = async (config: d.Config, hydrateAppFilePath: string, compon
     results.average = results.duration / results.urls;
   }
 
+  await config.sys.destroy();
   return results;
 };
 

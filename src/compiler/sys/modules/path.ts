@@ -1,26 +1,45 @@
 import * as d from '../../../declarations';
-import { posix, win32, IS_WINDOWS_ENV, normalizePath } from '@utils';
+import { normalizePath } from '@utils';
+import pathBrowserify from 'path-browserify';
 
-export const path: d.PlatformPath = IS_WINDOWS_ENV ? win32 : posix;
+export let basename: any;
+export let dirname: any;
+export let extname: any;
+export let isAbsolute: any;
+export let join: any;
+export let normalize: any;
+export let parse: any;
+export let relative: any;
+export let resolve: any;
+export let sep: any;
+export let delimiter: any;
+export let posix: any;
 
-if (IS_WINDOWS_ENV) {
-  path.normalize = (...args: string[]) => normalizePath(path.normalize.apply(path, args));
-  path.join = (...args: string[]) => normalizePath(path.join.apply(path, args));
-  path.relative = (...args: string[]) => normalizePath(path.relative.apply(path, args));
-  path.resolve = (...args: string[]) => normalizePath(path.resolve.apply(path, args));
-}
+export const path: d.PlatformPath = {} as any;
 
-export const basename = path.basename;
-export const dirname = path.dirname;
-export const extname = path.extname;
-export const isAbsolute = path.isAbsolute;
-export const join = path.join;
-export const normalize = path.normalize;
-export const parse = path.parse;
-export const relative = path.relative;
-export const resolve = path.resolve;
-export const sep = path.sep;
-export const delimiter = path.delimiter;
-export { posix, win32 };
+export const setPlatformPath = (platformPath: d.PlatformPath) => {
+  Object.assign(path, platformPath);
+
+  const normalizeOrg = path.normalize;
+  const joinOrg = path.join;
+  const relativeOrg = path.relative;
+  const resolveOrg = path.resolve;
+
+  normalize = path.normalize = (...args: string[]) => normalizePath(normalizeOrg.apply(path, args));
+  join = path.join = (...args: string[]) => normalizePath(joinOrg.apply(path, args));
+  relative = path.relative = (...args: string[]) => normalizePath(relativeOrg.apply(path, args));
+  resolve = path.resolve = (...args: string[]) => normalizePath(resolveOrg.apply(path, args));
+
+  basename = path.basename;
+  dirname = path.dirname;
+  extname = path.extname;
+  isAbsolute = path.isAbsolute;
+  parse = path.parse;
+  sep = path.sep;
+  delimiter = path.delimiter;
+  posix = path.posix;
+};
+
+setPlatformPath(pathBrowserify);
 
 export default path;

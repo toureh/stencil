@@ -47,6 +47,6 @@ if (typeof globalThis === 'undefined') {
     gbl.__dirname = '/';
   }
   if (!gbl.__filename) {
-    gbl.__filename = '/index.js';
+    gbl.__filename = '/stencil.js';
   }
 })(globalThis);

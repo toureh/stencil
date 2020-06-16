@@ -20,6 +20,19 @@ declare module 'https://deno.land/std/fs/mod.ts' {
 
 declare module 'https://deno.land/std/path/mod.ts' {
   export function isGlob(p: string): boolean;
+  export function normalize(p: string): string;
+  export function join(...paths: string[]): string;
+  export function resolve(...pathSegments: string[]): string;
+  export function isAbsolute(p: string): boolean;
+  export function relative(from: string, to: string): string;
+  export function dirname(p: string): string;
+  export function basename(p: string, ext?: string): string;
+  export function extname(p: string): string;
+  export function parse(p: string): any;
+  export const sep: string;
+  export const delimiter: string;
+  export const posix: any;
+  export const win32: any;
 }
 
 declare module 'https://deno.land/std/fmt/colors.ts' {
