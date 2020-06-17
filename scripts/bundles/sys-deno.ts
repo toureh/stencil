@@ -1,3 +1,4 @@
+import fs from 'fs-extra';
 import { join } from 'path';
 import { aliasPlugin } from './plugins/alias-plugin';
 import { BuildOptions } from '../utils/options';
@@ -23,6 +24,9 @@ export async function sysDeno(opts: BuildOptions) {
       unknownGlobalSideEffects: false,
     },
   };
+
+  const srcWorker = join(opts.bundleHelpersDir, 'deno-init-worker.js');
+  const destWorker = join(opts.output.sysDenoDir, 'init-worker.js');
 
   return [sysNodeBundle];
 }

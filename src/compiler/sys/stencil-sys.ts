@@ -549,15 +549,13 @@ export const createSystem = () => {
     createWorkerController: HAS_WEB_WORKER ? maxConcurrentWorkers => createWebWorkerMainController(sys, maxConcurrentWorkers) : null,
     details: {
       cpuModel: '',
-      cpus: -1,
-      freemem() {
-        return 0;
-      },
+      cpus: (typeof navigator && navigator.hardwareConcurrency) || 1,
+      freemem: () => 0,
       platform: '',
       release: '',
       runtime: 'browser',
       runtimeVersion: '',
-      totalmem: -1,
+      totalmem: 0,
     },
     copy,
   };

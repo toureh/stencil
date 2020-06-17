@@ -12,6 +12,7 @@ import { basename, delimiter, dirname, extname, isAbsolute, join, normalize, par
 import { normalizePath } from '@utils';
 import type { Deno as DenoTypes } from '../../../types/lib.deno';
 import { denoCopyTasks } from './deno-copy-tasks';
+import { createDenobWorkerMainController } from './deno-worker-main';
 
 export function createDenoSys(c: { Deno: any; logger: Logger }) {
   let tmpDir: string = null;
@@ -49,6 +50,7 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
         return false;
       }
     },
+    createWorkerController: maxConcurrentWorkers => createDenobWorkerMainController(deno, sys, maxConcurrentWorkers),
     async destroy() {
       const waits: Promise<void>[] = [];
       destroys.forEach(cb => {
@@ -329,10 +331,13 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
       };
       dirWatcher();
 
+      const close = async () => {
+        await fsWatcher.return();
+      };
+      sys.addDestory(close);
+
       return {
-        async close() {
-          await fsWatcher.return();
-        },
+        close,
       };
     },
     watchFile(p, callback) {
@@ -360,10 +365,13 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
       };
       fileWatcher();
 
+      const close = async () => {
+        await fsWatcher.return();
+      };
+      sys.addDestory(close);
+
       return {
-        async close() {
-          await fsWatcher.return();
-        },
+        close,
       };
     },
     async generateContentHash(content) {
@@ -383,11 +391,10 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
     },
     copy: (copyTasks, srcDir) => denoCopyTasks(deno, copyTasks, srcDir),
     details: {
-      cpuModel: deno.build.arch,
-      cpus: 1,
-      freemem() {
-        return 0;
-      },
+      // https://github.com/denoland/deno/issues/3802
+      cpuModel: 'cpu-model',
+      cpus: 8,
+      freemem: () => 0,
       platform: deno.build.os,
       release: deno.build.vendor,
       runtime: 'deno',

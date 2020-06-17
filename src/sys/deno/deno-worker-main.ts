@@ -1,12 +1,12 @@
-import * as d from '../../../declarations';
+import * as d from '../../declarations';
+import type { Deno as DenoTypes } from '../../../types/lib.deno';
 import { TASK_CANCELED_MSG } from '@utils';
 
-export const createWebWorkerMainController = (sys: d.CompilerSystem, maxConcurrentWorkers: number): d.WorkerMainController => {
+export const createDenobWorkerMainController = (_deno: typeof DenoTypes, sys: d.CompilerSystem, maxConcurrentWorkers: number): d.WorkerMainController => {
   let msgIds = 0;
   let isDestroyed = false;
   let isQueued = false;
   let workerIds = 0;
-  let workerBlob: Blob;
   const tasks = new Map<number, d.CompilerWorkerTask>();
   const queuedSendMsgs: d.MsgToWorker[] = [];
   const workers: WorkerChild[] = [];
@@ -44,22 +44,14 @@ export const createWebWorkerMainController = (sys: d.CompilerSystem, maxConcurre
   const onWorkerError = (e: ErrorEvent) => console.error(e);
 
   const createWebWorkerMain = () => {
-    let worker: Worker = null;
-    const workerUrl = sys.getCompilerExecutingPath();
+    const workerUrl = 'file://' + sys.getCompilerExecutingPath();
+    console.log(workerUrl);
     const workerOpts: WorkerOptions = {
       name: `stencil.worker.${workerIds++}`,
+      type: `module`,
     };
 
-    try {
-      // first try directly starting the worker with the URL
-      worker = new Worker(workerUrl, workerOpts);
-    } catch (e) {
-      // probably a cross-origin issue, try using a Blob instead
-      if (workerBlob == null) {
-        workerBlob = new Blob([`importScripts('${workerUrl}');`], { type: 'application/javascript' });
-      }
-      worker = new Worker(URL.createObjectURL(workerBlob), workerOpts);
-    }
+    const worker = new Worker(workerUrl, workerOpts);
 
     const workerChild: WorkerChild = {
       worker,
@@ -80,30 +72,30 @@ export const createWebWorkerMainController = (sys: d.CompilerSystem, maxConcurre
   };
 
   const queueMsgToWorker = (msg: d.MsgToWorker) => {
-    let theChosenOne: WorkerChild;
+    let theChoseOne: WorkerChild;
 
     if (workers.length > 0) {
-      theChosenOne = workers[0];
+      theChoseOne = workers[0];
 
       if (totalWorkers > 1) {
         for (const worker of workers) {
-          if (worker.activeTasks < theChosenOne.activeTasks) {
-            theChosenOne = worker;
+          if (worker.activeTasks < theChoseOne.activeTasks) {
+            theChoseOne = worker;
           }
         }
 
-        if (theChosenOne.activeTasks > 0 && workers.length < totalWorkers) {
-          theChosenOne = createWebWorkerMain();
-          workers.push(theChosenOne);
+        if (theChoseOne.activeTasks > 0 && workers.length < totalWorkers) {
+          theChoseOne = createWebWorkerMain();
+          workers.push(theChoseOne);
         }
       }
     } else {
-      theChosenOne = createWebWorkerMain();
-      workers.push(theChosenOne);
+      theChoseOne = createWebWorkerMain();
+      workers.push(theChoseOne);
     }
 
-    theChosenOne.activeTasks++;
-    theChosenOne.sendQueue.push(msg);
+    theChoseOne.activeTasks++;
+    theChoseOne.sendQueue.push(msg);
   };
 
   const flushSendQueue = () => {
