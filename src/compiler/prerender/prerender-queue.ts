@@ -84,11 +84,11 @@ export const drainPrerenderQueue = (results: d.PrerenderResults, manager: d.Prer
       // kick off async prerendering
       prerenderUrl(results, manager, url);
 
-      // could be more ready for prerendering
-      // let's check again after a tick
-      manager.config.sys.nextTick(() => {
-        drainPrerenderQueue(results, manager);
-      });
+      if (manager.urlsProcessing.size < manager.maxConcurrency) {
+        // could be more ready for prerendering
+        // let's check again after a tick
+        manager.config.sys.nextTick(() => drainPrerenderQueue(results, manager));
+      }
     }
   }
 

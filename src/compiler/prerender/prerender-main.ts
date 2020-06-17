@@ -1,6 +1,7 @@
 import * as d from '../../declarations';
 import { buildError, catchError, hasError } from '@utils';
-import { createSysWorker } from '../sys/worker/sys-worker';
+import { createWorkerContext } from '../worker/worker-thread';
+import { createWorkerMainContext } from '../worker/main-thread';
 import { drainPrerenderQueue, initializePrerenderEntryUrls } from './prerender-queue';
 import { generateRobotsTxt } from './robots-txt';
 import { generateSitemapXml } from './sitemap-xml';
@@ -53,16 +54,25 @@ const runPrerender = async (config: d.Config, hydrateAppFilePath: string, compon
   }
 
   if (!hasError(diagnostics)) {
-    const workerCtx = createSysWorker(config.sys, config.maxConcurrentWorkers);
+    let workerCtx: d.CompilerWorkerContext;
+    let workerCtrl: d.WorkerMainController;
+
+    if (config.sys.createWorkerController == null || config.maxConcurrentWorkers < 1) {
+      workerCtx = createWorkerContext();
+    } else {
+      workerCtrl = config.sys.createWorkerController(config.maxConcurrentWorkers);
+      workerCtx = createWorkerMainContext(workerCtrl);
+    }
+
     const devServerConfig = { ...config.devServer };
     devServerConfig.openBrowser = false;
     devServerConfig.gzip = false;
     devServerConfig.logRequests = false;
     devServerConfig.reloadStrategy = null;
+
     const devServerPath = config.sys.getDevServerExecutingPath();
     const { start }: typeof import('@stencil/core/dev-server') = await config.sys.dynamicImport(devServerPath);
     const devServer = await start(devServerConfig, config.logger);
-    config.sys.addDestory(() => devServer.close());
 
     try {
       await Promise.all(
@@ -73,6 +83,13 @@ const runPrerender = async (config: d.Config, hydrateAppFilePath: string, compon
     } catch (e) {
       catchError(diagnostics, e);
     }
+
+    if (workerCtrl) {
+      workerCtrl.destroy();
+    }
+    if (devServer) {
+      await devServer.close();
+    }
   }
 
   results.duration = Date.now() - startTime;
@@ -80,7 +97,6 @@ const runPrerender = async (config: d.Config, hydrateAppFilePath: string, compon
     results.average = results.duration / results.urls;
   }
 
-  await config.sys.destroy();
   return results;
 };
 

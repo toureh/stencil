@@ -1,5 +1,5 @@
 import * as d from '../../../declarations';
-import { normalizePath } from '@utils';
+import { normalizePath, IS_NODE_ENV, requireFunc } from '@utils';
 import pathBrowserify from 'path-browserify';
 
 export let basename: any;
@@ -40,6 +40,6 @@ export const setPlatformPath = (platformPath: d.PlatformPath) => {
   posix = path.posix;
 };
 
-setPlatformPath(pathBrowserify);
+setPlatformPath(IS_NODE_ENV ? requireFunc('path') : pathBrowserify);
 
 export default path;
