@@ -1164,7 +1164,7 @@ export type CompilerEventBuildLog = 'buildLog';
 export type CompilerEventBuildNoChange = 'buildNoChange';
 
 export interface CompilerFileWatcher {
-  close(): void;
+  close(): void | Promise<void>;
 }
 
 export interface CompilerFsStats {

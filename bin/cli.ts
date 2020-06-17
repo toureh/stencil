@@ -3,12 +3,16 @@ import { run } from '../cli/index.js';
 import { createDenoLogger, createDenoSys } from '../sys/deno/index.js';
 
 if (import.meta.main) {
-  const denoLogger = createDenoLogger({ Deno });
-  const denoSys = createDenoSys({ Deno, logger: denoLogger });
+  try {
+    const denoLogger = createDenoLogger({ Deno });
+    const denoSys = createDenoSys({ Deno, logger: denoLogger });
 
-  run({ 
-    args: Deno.args, 
-    logger: denoLogger, 
-    sys: denoSys
-  });
+    run({
+      args: Deno.args,
+      logger: denoLogger,
+      sys: denoSys,
+    });
+  } catch (e) {
+    console.error('uncaught error', e);
+  }
 }

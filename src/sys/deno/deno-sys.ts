@@ -175,9 +175,9 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
       } catch (e) {}
       return undefined;
     },
-    realpath(p) {
+    async realpath(p) {
       try {
-        return deno.realPath(p);
+        return await deno.realPath(p);
       } catch (e) {}
       return undefined;
     },
@@ -308,54 +308,62 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
       const fsWatcher = deno.watchFs(p, { recursive });
 
       const dirWatcher = async () => {
-        for await (const fsEvent of fsWatcher) {
-          for (const fsPath of fsEvent.paths) {
-            const fileName = normalizePath(fsPath);
+        try {
+          for await (const fsEvent of fsWatcher) {
+            for (const fsPath of fsEvent.paths) {
+              const fileName = normalizePath(fsPath);
 
-            if (fsEvent.kind === 'create') {
-              callback(fileName, 'dirAdd');
-              sys.events.emit('dirAdd', fileName);
-            } else if (fsEvent.kind === 'modify') {
-              callback(fileName, 'fileUpdate');
-              sys.events.emit('fileUpdate', fileName);
-            } else if (fsEvent.kind === 'remove') {
-              callback(fileName, 'dirDelete');
-              sys.events.emit('dirDelete', fileName);
+              if (fsEvent.kind === 'create') {
+                callback(fileName, 'dirAdd');
+                sys.events.emit('dirAdd', fileName);
+              } else if (fsEvent.kind === 'modify') {
+                callback(fileName, 'fileUpdate');
+                sys.events.emit('fileUpdate', fileName);
+              } else if (fsEvent.kind === 'remove') {
+                callback(fileName, 'dirDelete');
+                sys.events.emit('dirDelete', fileName);
+              }
             }
           }
-        }
+        } catch (e) {}
       };
       dirWatcher();
 
       return {
-        close() {},
+        async close() {
+          await fsWatcher.return();
+        },
       };
     },
     watchFile(p, callback) {
       const fsWatcher = deno.watchFs(p, { recursive: false });
 
       const fileWatcher = async () => {
-        for await (const fsEvent of fsWatcher) {
-          for (const fsPath of fsEvent.paths) {
-            const fileName = normalizePath(fsPath);
+        try {
+          for await (const fsEvent of fsWatcher) {
+            for (const fsPath of fsEvent.paths) {
+              const fileName = normalizePath(fsPath);
 
-            if (fsEvent.kind === 'create') {
-              callback(fileName, 'fileAdd');
-              sys.events.emit('fileAdd', fileName);
-            } else if (fsEvent.kind === 'modify') {
-              callback(fileName, 'fileUpdate');
-              sys.events.emit('fileUpdate', fileName);
-            } else if (fsEvent.kind === 'remove') {
-              callback(fileName, 'fileDelete');
-              sys.events.emit('fileDelete', fileName);
+              if (fsEvent.kind === 'create') {
+                callback(fileName, 'fileAdd');
+                sys.events.emit('fileAdd', fileName);
+              } else if (fsEvent.kind === 'modify') {
+                callback(fileName, 'fileUpdate');
+                sys.events.emit('fileUpdate', fileName);
+              } else if (fsEvent.kind === 'remove') {
+                callback(fileName, 'fileDelete');
+                sys.events.emit('fileDelete', fileName);
+              }
             }
           }
-        }
+        } catch (e) {}
       };
       fileWatcher();
 
       return {
-        close() {},
+        async close() {
+          await fsWatcher.return();
+        },
       };
     },
     async generateContentHash(content) {
