@@ -401,6 +401,16 @@ export interface ComponentInterface {
   componentDidLoad?(): void;
 
   /**
+   * A `@Prop` or `@State` property changed and a rerender is about to be requested.
+   *
+   * Called multiple times throughout the life of
+   * the component as its properties change.
+   *
+   * componentShouldUpdate is not called on the first render.
+   */
+  componentShouldUpdate?(newVal: any, oldVal: any, propName: string): boolean | void;
+
+  /**
    * The component is about to update and re-render.
    *
    * Called multiple times throughout the life of
@@ -875,8 +885,8 @@ export namespace JSXBase {
     accept?: string;
     allowdirs?: boolean;
     alt?: string;
-    autoCapitalize?: string;
-    autocapitalize?: string;
+    autoCapitalize?: any;
+    autocapitalize?: any;
     autoComplete?: string;
     autocomplete?: string;
     autoFocus?: boolean;
@@ -1235,8 +1245,8 @@ export namespace JSXBase {
     vocab?: string;
 
     // Non-standard Attributes
-    autoCapitalize?: string;
-    autocapitalize?: string;
+    autoCapitalize?: any;
+    autocapitalize?: any;
     autoCorrect?: string;
     autocorrect?: string;
     autoSave?: string;
@@ -1436,8 +1446,8 @@ export namespace JSXBase {
     'primitiveUnits'?: number | string;
     'r'?: number | string;
     'radius'?: number | string;
-    'ref-x'?: number | string;
-    'ref-y'?: number | string;
+    'refX'?: number | string;
+    'refY'?: number | string;
     'rendering-intent'?: number | string;
     'repeatCount'?: number | string;
     'repeatDur'?: number | string;
