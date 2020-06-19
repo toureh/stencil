@@ -1,4 +1,4 @@
-import * as d from '../../declarations';
+import type * as d from '../../declarations';
 import type { Deno as DenoTypes } from '../../../types/lib.deno';
 import { TASK_CANCELED_MSG } from '@utils';
 
@@ -43,9 +43,8 @@ export const createDenobWorkerMainController = (_deno: typeof DenoTypes, sys: d.
 
   const onWorkerError = (e: ErrorEvent) => console.error(e);
 
-  const createWebWorkerMain = () => {
-    const workerUrl = 'file://' + sys.getCompilerExecutingPath();
-    console.log(workerUrl);
+  const createWorkerMain = () => {
+    const workerUrl = new URL('./worker.js', import.meta.url).href;
     const workerOpts: WorkerOptions = {
       name: `stencil.worker.${workerIds++}`,
       type: `module`,
@@ -72,30 +71,30 @@ export const createDenobWorkerMainController = (_deno: typeof DenoTypes, sys: d.
   };
 
   const queueMsgToWorker = (msg: d.MsgToWorker) => {
-    let theChoseOne: WorkerChild;
+    let theChosenOne: WorkerChild;
 
     if (workers.length > 0) {
-      theChoseOne = workers[0];
+      theChosenOne = workers[0];
 
       if (totalWorkers > 1) {
         for (const worker of workers) {
-          if (worker.activeTasks < theChoseOne.activeTasks) {
-            theChoseOne = worker;
+          if (worker.activeTasks < theChosenOne.activeTasks) {
+            theChosenOne = worker;
           }
         }
 
-        if (theChoseOne.activeTasks > 0 && workers.length < totalWorkers) {
-          theChoseOne = createWebWorkerMain();
-          workers.push(theChoseOne);
+        if (theChosenOne.activeTasks > 0 && workers.length < totalWorkers) {
+          theChosenOne = createWorkerMain();
+          workers.push(theChosenOne);
         }
       }
     } else {
-      theChoseOne = createWebWorkerMain();
-      workers.push(theChoseOne);
+      theChosenOne = createWorkerMain();
+      workers.push(theChosenOne);
     }
 
-    theChoseOne.activeTasks++;
-    theChoseOne.sendQueue.push(msg);
+    theChosenOne.activeTasks++;
+    theChosenOne.sendQueue.push(msg);
   };
 
   const flushSendQueue = () => {

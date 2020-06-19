@@ -1,5 +1,5 @@
 import * as d from '../../../declarations';
-import { catchError, IS_GLOBAL_THIS_ENV, IS_NODE_ENV, IS_WEB_WORKER_ENV, isFunction, requireFunc, IS_FETCH_ENV } from '@utils';
+import { catchError, IS_FETCH_ENV, IS_NODE_ENV, IS_WEB_WORKER_ENV, isFunction, requireFunc } from '@utils';
 import { httpFetch } from '../fetch/fetch-utils';
 import { getRemoteDependencyUrl } from '../dependencies';
 import { patchTsSystemUtils } from './typescript-sys';
@@ -48,19 +48,17 @@ export const loadTypescriptSync = (sys: d.CompilerSystem, diagnostics: d.Diagnos
       return ts as TypeScriptModule;
     }
 
-    if (IS_GLOBAL_THIS_ENV) {
-      // check if the global object has "ts" on it
-      // could be browser main thread, browser web worker, or nodejs global
-      const globalThisTs = getLoadedTs((globalThis as any).ts, 'globalThis', typescriptPath);
-      if (globalThisTs) {
-        return globalThisTs;
-      }
+    // check if the global object has "ts" on it
+    // could be browser main thread, browser web worker, or nodejs global
+    const globalThisTs = getLoadedTs((globalThis as any).ts, 'globalThis', typescriptPath);
+    if (globalThisTs) {
+      return globalThisTs;
     }
 
     if (IS_NODE_ENV) {
       // NodeJS proces
       const nodeModuleId = typescriptPath || 'typescript';
-      const nodeTs = getLoadedTs(requireFunc(nodeModuleId), 'nodejs', nodeModuleId);
+      const nodeTs = getLoadedTs(requireFunc(nodeModuleId), 'node', nodeModuleId);
       if (nodeTs) {
         return nodeTs;
       }

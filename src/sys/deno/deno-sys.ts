@@ -1,4 +1,4 @@
-import {
+import type {
   CompilerSystem,
   CompilerFsStats,
   CompilerSystemRenameResults,
@@ -327,12 +327,20 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
               }
             }
           }
-        } catch (e) {}
+        } catch (e) {
+          // todo
+          // swallows "BadResource: Bad resource ID at unwrapResponse"??
+        }
       };
       dirWatcher();
 
       const close = async () => {
-        await fsWatcher.return();
+        try {
+          await fsWatcher.return();
+        } catch (e) {
+          // todo
+          // swallows "BadResource: Bad resource ID at unwrapResponse"??
+        }
       };
       sys.addDestory(close);
 
@@ -361,12 +369,20 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
               }
             }
           }
-        } catch (e) {}
+        } catch (e) {
+          // todo
+          // swallows "BadResource: Bad resource ID at unwrapResponse"??
+        }
       };
       fileWatcher();
 
       const close = async () => {
-        await fsWatcher.return();
+        try {
+          await fsWatcher.return();
+        } catch (e) {
+          // todo
+          // swallows "BadResource: Bad resource ID at unwrapResponse"??
+        }
       };
       sys.addDestory(close);
 

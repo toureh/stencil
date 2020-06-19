@@ -1,16 +1,13 @@
-import { isNumber, isString } from '@utils';
-import { MsgFromWorker, MsgToWorker, WorkerMsgHandler } from '../../../declarations';
+import type { MsgFromWorker, MsgToWorker, WorkerMsgHandler } from '../../declarations';
 
-export const initWebWorkerThread = (msgHandler: WorkerMsgHandler) => {
+export const initDenoWorkerThread = (glbl: any, msgHandler: WorkerMsgHandler) => {
   let isQueued = false;
-
-  const tick = Promise.resolve();
 
   const msgsFromWorkerQueue: MsgFromWorker[] = [];
 
   const drainMsgQueueFromWorkerToMain = () => {
     isQueued = false;
-    (self as any).postMessage(msgsFromWorkerQueue);
+    glbl.postMessage(msgsFromWorkerQueue);
     msgsFromWorkerQueue.length = 0;
   };
 
@@ -18,7 +15,7 @@ export const initWebWorkerThread = (msgHandler: WorkerMsgHandler) => {
     msgsFromWorkerQueue.push(msgFromWorkerToMain);
     if (!isQueued) {
       isQueued = true;
-      tick.then(drainMsgQueueFromWorkerToMain);
+      queueMicrotask(drainMsgQueueFromWorkerToMain);
     }
   };
 
@@ -28,7 +25,7 @@ export const initWebWorkerThread = (msgHandler: WorkerMsgHandler) => {
       stencilRtnValue: null,
       stencilRtnError: 'Error',
     };
-    if (isString(err)) {
+    if (typeof err === 'string') {
       errMsgFromWorkerToMain.stencilRtnError += ': ' + err;
     } else if (err) {
       if (err.stack) {
@@ -41,7 +38,7 @@ export const initWebWorkerThread = (msgHandler: WorkerMsgHandler) => {
   };
 
   const receiveMsgFromMainToWorker = async (msgToWorker: MsgToWorker) => {
-    if (msgToWorker && isNumber(msgToWorker.stencilId)) {
+    if (msgToWorker && typeof msgToWorker.stencilId === 'number') {
       try {
         // run the handler to get the data
         const msgFromWorkerToMain: MsgFromWorker = {
@@ -57,7 +54,7 @@ export const initWebWorkerThread = (msgHandler: WorkerMsgHandler) => {
     }
   };
 
-  self.onmessage = (ev: MessageEvent) => {
+  glbl.onmessage = (ev: MessageEvent) => {
     // message from the main thread
     const msgsFromMainToWorker: MsgToWorker[] = ev.data;
     if (Array.isArray(msgsFromMainToWorker)) {
@@ -67,7 +64,7 @@ export const initWebWorkerThread = (msgHandler: WorkerMsgHandler) => {
     }
   };
 
-  self.onerror = e => {
+  glbl.onerror = (e: any) => {
     // uncaught error occurred on the worker thread
     error(-1, e);
   };

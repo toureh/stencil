@@ -42,7 +42,36 @@ export async function sysNode(opts: BuildOptions) {
     },
   };
 
-  return [sysNodeBundle];
+  const inputWorkerFile = join(opts.transpiledDir, 'sys', 'node', 'worker.js');
+  const outputWorkerFile = join(opts.output.sysNodeDir, 'worker.js');
+  const sysNodeWorkerBundle: RollupOptions = {
+    input: inputWorkerFile,
+    output: {
+      format: 'cjs',
+      file: outputWorkerFile,
+      preferConst: true,
+    },
+    external: ['child_process', 'crypto', 'events', 'https', 'path', 'readline', 'os', 'util'],
+    plugins: [
+      rollupResolve({
+        preferBuiltins: true,
+      }),
+      prettyMinifyPlugin(opts),
+      {
+        name: 'sysNodeWorkerAlias',
+        resolveId(id) {
+          if (id === '@stencil/core/compiler') {
+            return {
+              id: '../../compiler/stencil.js',
+              external: true,
+            };
+          }
+        },
+      },
+    ],
+  };
+
+  return [sysNodeBundle, sysNodeWorkerBundle];
 }
 
 export async function sysNodeExternalBundles(opts: BuildOptions) {

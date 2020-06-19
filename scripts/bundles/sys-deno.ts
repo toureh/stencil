@@ -10,7 +10,7 @@ export async function sysDeno(opts: BuildOptions) {
   const inputFile = join(opts.transpiledDir, 'sys', 'deno', 'index.js');
   const outputFile = join(opts.output.sysDenoDir, 'index.js');
 
-  const sysNodeBundle: RollupOptions = {
+  const sysDenoBundle: RollupOptions = {
     input: inputFile,
     output: {
       format: 'esm',
@@ -25,8 +25,30 @@ export async function sysDeno(opts: BuildOptions) {
     },
   };
 
-  const srcWorker = join(opts.bundleHelpersDir, 'deno-init-worker.js');
-  const destWorker = join(opts.output.sysDenoDir, 'init-worker.js');
+  const inputWorkerFile = join(opts.transpiledDir, 'sys', 'deno', 'worker.js');
+  const outputWorkerFile = join(opts.output.sysDenoDir, 'worker.js');
+  const sysDenoWorkerBundle: RollupOptions = {
+    input: inputWorkerFile,
+    output: {
+      format: 'esm',
+      file: outputWorkerFile,
+      preferConst: true,
+    },
+    plugins: [
+      prettyMinifyPlugin(opts),
+      {
+        name: 'sysDenoWorkerAlias',
+        resolveId(id) {
+          if (id === '@stencil/core/compiler') {
+            return {
+              id: '../../compiler/stencil.js',
+              external: true,
+            };
+          }
+        },
+      },
+    ],
+  };
 
-  return [sysNodeBundle];
+  return [sysDenoBundle, sysDenoWorkerBundle];
 }

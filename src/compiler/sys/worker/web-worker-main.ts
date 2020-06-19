@@ -43,7 +43,7 @@ export const createWebWorkerMainController = (sys: d.CompilerSystem, maxConcurre
 
   const onWorkerError = (e: ErrorEvent) => console.error(e);
 
-  const createWebWorkerMain = () => {
+  const createWorkerMain = () => {
     let worker: Worker = null;
     const workerUrl = sys.getCompilerExecutingPath();
     const workerOpts: WorkerOptions = {
@@ -93,12 +93,12 @@ export const createWebWorkerMainController = (sys: d.CompilerSystem, maxConcurre
         }
 
         if (theChosenOne.activeTasks > 0 && workers.length < totalWorkers) {
-          theChosenOne = createWebWorkerMain();
+          theChosenOne = createWorkerMain();
           workers.push(theChosenOne);
         }
       }
     } else {
-      theChosenOne = createWebWorkerMain();
+      theChosenOne = createWorkerMain();
       workers.push(theChosenOne);
     }
 

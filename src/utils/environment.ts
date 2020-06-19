@@ -17,8 +17,6 @@ export const IS_WINDOWS_ENV = IS_DENO_WINDOWS_ENV || IS_NODE_WINDOWS_ENV;
 
 export const IS_LOCATION_ENV = typeof location !== 'undefined';
 
-export const IS_GLOBAL_THIS_ENV = typeof globalThis !== 'undefined';
-
 export const IS_WEB_WORKER_ENV =
   typeof self !== 'undefined' && typeof (self as any).importScripts === 'function' && typeof XMLHttpRequest !== 'undefined' && IS_LOCATION_ENV && typeof navigator !== 'undefined';
 

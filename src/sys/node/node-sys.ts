@@ -8,7 +8,7 @@ import path from 'path';
 import { NodeLazyRequire } from './node-lazy-require';
 import { NodeResolveModule } from './node-resolve-module';
 import exit from 'exit';
-import { NodeWorkerController } from './worker/index';
+import { NodeWorkerController } from './worker/worker-controller';
 
 export function createNodeSys(c: { process: any }) {
   const prcs: NodeJS.Process = c.process;
@@ -61,7 +61,8 @@ export function createNodeSys(c: { process: any }) {
       });
     },
     createWorkerController(maxConcurrentWorkers) {
-      return new NodeWorkerController('stencil-compiler-worker', sys.getCompilerExecutingPath(), maxConcurrentWorkers);
+      const forkModulePath = path.join(__dirname, 'worker.js');
+      return new NodeWorkerController(forkModulePath, maxConcurrentWorkers);
     },
     async destroy() {
       const waits: Promise<void>[] = [];

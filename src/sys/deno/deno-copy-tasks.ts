@@ -1,4 +1,4 @@
-import * as d from '../../declarations';
+import type * as d from '../../declarations';
 import type { Deno } from '../../../types/lib.deno';
 import { buildError, catchError, flatOne, normalizePath, unique } from '@utils';
 import { basename, dirname, expandGlob, isGlob, isAbsolute, join, resolve } from './deps';

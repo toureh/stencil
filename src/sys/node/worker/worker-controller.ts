@@ -14,7 +14,7 @@ export class NodeWorkerController extends EventEmitter implements d.WorkerMainCo
   useForkedWorkers: boolean;
   mainThreadRunner: { [fnName: string]: (...args: any[]) => Promise<any> };
 
-  constructor(public workerDomain: string, public forkModulePath: string, maxConcurrentWorkers: number) {
+  constructor(public forkModulePath: string, maxConcurrentWorkers: number) {
     super();
     const osCpus = cpus().length;
 
@@ -69,7 +69,7 @@ export class NodeWorkerController extends EventEmitter implements d.WorkerMainCo
 
   startWorker() {
     const workerId = this.workerIds++;
-    const worker = new NodeWorkerMain(this.workerDomain, workerId, this.forkModulePath);
+    const worker = new NodeWorkerMain(workerId, this.forkModulePath);
 
     worker.on('response', this.processTaskQueue.bind(this));
 
