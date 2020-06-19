@@ -2,7 +2,7 @@ import * as d from '../../../declarations';
 import { basename, dirname, isAbsolute, join, resolve } from 'path';
 import { getStencilInternalDtsPath, isDtsFile, isJsFile, isJsxFile, isLocalModule, isStencilCoreImport, isTsxFile, isTsFile, isJsonFile } from '../resolve/resolve-utils';
 import { isExternalUrl } from '../fetch/fetch-utils';
-import { isString, IS_LOCATION_ENV, IS_NODE_ENV, IS_WEB_WORKER_ENV, normalizePath } from '@utils';
+import { isString, IS_BROWSER_ENV, IS_NODE_ENV, IS_WEB_WORKER_ENV, normalizePath } from '@utils';
 import { patchTsSystemFileSystem } from './typescript-sys';
 import { resolveRemoteModuleIdSync } from '../resolve/resolve-module-sync';
 import { version } from '../../../version';
@@ -12,7 +12,7 @@ export const patchTypeScriptResolveModule = (loadedTs: typeof ts, config: d.Conf
   let compilerExe: string;
   if (config.sys) {
     compilerExe = config.sys.getCompilerExecutingPath();
-  } else if (IS_LOCATION_ENV) {
+  } else if (IS_BROWSER_ENV) {
     compilerExe = location.href;
   }
 

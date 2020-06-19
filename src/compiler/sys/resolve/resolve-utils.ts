@@ -1,5 +1,5 @@
 import * as d from '../../../declarations';
-import { IS_FETCH_ENV, IS_NODE_ENV, normalizePath } from '@utils';
+import { IS_BROWSER_ENV, IS_FETCH_ENV, normalizePath } from '@utils';
 import { join } from 'path';
 
 const COMMON_DIR_MODULE_EXTS = ['.tsx', '.ts', '.mjs', '.js', '.jsx', '.json', '.md'];
@@ -47,12 +47,9 @@ export const isLocalModule = (p: string) => p.startsWith('.') || p.startsWith('/
 
 export const isStencilCoreImport = (p: string) => p.startsWith('@stencil/core');
 
-export const shouldFetchModule = (p: string) => IS_FETCH_ENV && !IS_NODE_ENV && isNodeModulePath(p);
+export const shouldFetchModule = (p: string) => IS_FETCH_ENV && IS_BROWSER_ENV && isNodeModulePath(p);
 
-export const isNodeModulePath = (p: string) =>
-  normalizePath(p)
-    .split('/')
-    .includes('node_modules');
+export const isNodeModulePath = (p: string) => normalizePath(p).split('/').includes('node_modules');
 
 export const getPackageDirPath = (p: string, moduleId: string) => {
   const parts = normalizePath(p).split('/');

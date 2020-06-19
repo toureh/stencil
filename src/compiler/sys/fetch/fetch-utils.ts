@@ -2,7 +2,7 @@ import * as d from '../../../declarations';
 import { isFunction, isString, normalizePath } from '@utils';
 import { isCommonDirModuleFile, isTsFile, isTsxFile } from '../resolve/resolve-utils';
 
-export const httpFetch = (sys: d.CompilerSystem, input: RequestInfo, init?: RequestInit) => {
+export const httpFetch = (sys: d.CompilerSystem, input: RequestInfo, init?: RequestInit): Promise<Response> => {
   if (sys && isFunction(sys.fetch)) {
     return sys.fetch(input, init);
   }
