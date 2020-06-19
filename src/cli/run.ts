@@ -1,5 +1,5 @@
 import type { CliInitOptions } from '../declarations';
-import { hasError, shouldIgnoreError } from '@utils';
+import { hasError, isFunction, shouldIgnoreError } from '@utils';
 import { loadCoreCompiler } from './load-compiler';
 import { parseFlags } from './parse-flags';
 import { taskBuild } from './task-build';
@@ -20,6 +20,10 @@ export async function run(init: CliInitOptions) {
 
     if (flags.ci) {
       logger.enableColors(false);
+    }
+
+    if (isFunction(sys.applyGlobalPatch)) {
+      sys.applyGlobalPatch(sys.getCurrentDirectory());
     }
 
     const coreCompiler = await loadCoreCompiler(sys);
@@ -49,6 +53,10 @@ export async function run(init: CliInitOptions) {
       if (hasError(validated.diagnostics)) {
         sys.exit(1);
       }
+    }
+
+    if (isFunction(sys.applyGlobalPatch)) {
+      sys.applyGlobalPatch(validated.config.rootDir);
     }
 
     switch (flags.task) {

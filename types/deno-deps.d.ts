@@ -47,3 +47,8 @@ declare module 'https://deno.land/std/fmt/colors.ts' {
   export function red(str: string): string;
   export function yellow(str: string): string;
 }
+
+declare module 'https://deno.land/std/node/module.ts' {
+  export const builtinModules: string[];
+  export function createRequire(filename: string | URL): any;
+}

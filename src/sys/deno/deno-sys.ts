@@ -8,11 +8,12 @@ import type {
   CompilerSystemWriteFileResults,
   Logger,
 } from '../../declarations';
+import { applyNodeCompat, applyNodeRequire } from './deno-node-compat';
 import { basename, delimiter, dirname, extname, isAbsolute, join, normalize, parse, relative, resolve, sep, win32, posix } from './deps';
+import { createDenoWorkerMainController } from './deno-worker-main';
+import { denoCopyTasks } from './deno-copy-tasks';
 import { normalizePath } from '@utils';
 import type { Deno as DenoTypes } from '../../../types/lib.deno';
-import { denoCopyTasks } from './deno-copy-tasks';
-import { createDenobWorkerMainController } from './deno-worker-main';
 
 export function createDenoSys(c: { Deno: any; logger: Logger }) {
   let tmpDir: string = null;
@@ -50,7 +51,7 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
         return false;
       }
     },
-    createWorkerController: maxConcurrentWorkers => createDenobWorkerMainController(deno, sys, maxConcurrentWorkers),
+    createWorkerController: maxConcurrentWorkers => createDenoWorkerMainController(deno, sys, maxConcurrentWorkers),
     async destroy() {
       const waits: Promise<void>[] = [];
       destroys.forEach(cb => {
@@ -213,7 +214,14 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
       return normalizePath(p);
     },
     async rmdir(p, opts) {
-      const results: CompilerSystemRemoveDirectoryResults = { basename: basename(p), dirname: dirname(p), path: p, removedDirs: [], removedFiles: [], error: null };
+      const results: CompilerSystemRemoveDirectoryResults = {
+        basename: basename(p),
+        dirname: dirname(p),
+        path: p,
+        removedDirs: [],
+        removedFiles: [],
+        error: null,
+      };
       try {
         await deno.remove(p, opts);
       } catch (e) {
@@ -222,7 +230,14 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
       return results;
     },
     rmdirSync(p, opts) {
-      const results: CompilerSystemRemoveDirectoryResults = { basename: basename(p), dirname: dirname(p), path: p, removedDirs: [], removedFiles: [], error: null };
+      const results: CompilerSystemRemoveDirectoryResults = {
+        basename: basename(p),
+        dirname: dirname(p),
+        path: p,
+        removedDirs: [],
+        removedFiles: [],
+        error: null,
+      };
       try {
         deno.removeSync(p, opts);
       } catch (e) {
@@ -233,7 +248,12 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
     async stat(p) {
       try {
         const stat = await deno.stat(p);
-        const results: CompilerFsStats = { isFile: () => stat.isFile, isDirectory: () => stat.isDirectory, isSymbolicLink: () => stat.isSymlink, size: stat.size };
+        const results: CompilerFsStats = {
+          isFile: () => stat.isFile,
+          isDirectory: () => stat.isDirectory,
+          isSymbolicLink: () => stat.isSymlink,
+          size: stat.size,
+        };
         return results;
       } catch (e) {}
       return undefined;
@@ -241,7 +261,12 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
     statSync(p) {
       try {
         const stat = deno.statSync(p);
-        const results: CompilerFsStats = { isFile: () => stat.isFile, isDirectory: () => stat.isDirectory, isSymbolicLink: () => stat.isSymlink, size: stat.size };
+        const results: CompilerFsStats = {
+          isFile: () => stat.isFile,
+          isDirectory: () => stat.isDirectory,
+          isSymbolicLink: () => stat.isSymlink,
+          size: stat.size,
+        };
         return results;
       } catch (e) {}
       return undefined;
@@ -417,25 +442,10 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
       runtimeVersion: deno.version.deno,
       totalmem: 0,
     },
+    applyGlobalPatch: applyNodeRequire,
   };
 
-  ((gbl: any) => {
-    gbl.Buffer = {};
-
-    const currentUrl = new URL('./', import.meta.url);
-    gbl.__filename = currentUrl.pathname;
-    gbl.__dirname = dirname(gbl.__filename);
-
-    const process = (gbl.process = gbl.process || {});
-    process.argv = [deno.execPath(), gbl.__filename, ...deno.args];
-    process.binding = () => ({});
-    process.cwd = () => deno.cwd();
-    process.chdir = (dir: string) => deno.chdir(dir);
-    process.env = {};
-    process.nextTick = (cb: () => void) => queueMicrotask(cb);
-    process.platform = deno.build.os === 'windows' ? 'win32' : deno.build.os;
-    process.version = 'v12.0.0';
-  })(globalThis);
+  applyNodeCompat(deno, globalThis);
 
   return sys;
 }

@@ -2,7 +2,7 @@ import type * as d from '../../declarations';
 import type { Deno as DenoTypes } from '../../../types/lib.deno';
 import { TASK_CANCELED_MSG } from '@utils';
 
-export const createDenobWorkerMainController = (_deno: typeof DenoTypes, sys: d.CompilerSystem, maxConcurrentWorkers: number): d.WorkerMainController => {
+export const createDenoWorkerMainController = (_deno: typeof DenoTypes, sys: d.CompilerSystem, maxConcurrentWorkers: number): d.WorkerMainController => {
   let msgIds = 0;
   let isDestroyed = false;
   let isQueued = false;

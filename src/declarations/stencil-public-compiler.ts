@@ -816,6 +816,7 @@ export interface CompilerSystem {
    * SYNC! Always returns a boolean, does not throw.
    */
   accessSync(p: string): boolean;
+  applyGlobalPatch?(fromDir: string): void;
   cacheStorage?: CacheStorage;
   copy?(copyTasks: Required<CopyTask>[], srcDir: string): Promise<CopyResults>;
   /**

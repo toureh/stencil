@@ -2634,7 +2634,7 @@ export interface CliInitOptions {
   args: string[];
   logger: Logger;
   sys: CompilerSystem;
-  checkVersion: CheckVersion;
+  checkVersion?: CheckVersion;
 }
 
 export type CheckVersion = (config: Config, currentVersion: string) => Promise<() => void>;

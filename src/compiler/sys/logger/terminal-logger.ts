@@ -73,7 +73,10 @@ export const createTerminalLogger = (loggerSys: TerminalLoggerSys) => {
 
   const debug = (...msg: any[]) => {
     if (shouldLog('debug')) {
-      msg.push(dim(` MEM: ${(loggerSys.memoryUsage() / 1000000).toFixed(1)}MB`));
+      const mem = loggerSys.memoryUsage();
+      if (mem > 0) {
+        msg.push(dim(` MEM: ${(loggerSys.memoryUsage() / 1000000).toFixed(1)}MB`));
+      }
       const lines = wordWrap(msg, loggerSys.getColumns());
       debugPrefix(lines);
       console.log(lines.join('\n'));
@@ -96,7 +99,10 @@ export const createTerminalLogger = (loggerSys: TerminalLoggerSys) => {
 
     if (debug) {
       if (shouldLog('debug')) {
-        msg.push(dim(` MEM: ${(loggerSys.memoryUsage() / 1000000).toFixed(1)}MB`));
+        const mem = loggerSys.memoryUsage();
+        if (mem > 0) {
+          msg.push(dim(` MEM: ${(loggerSys.memoryUsage() / 1000000).toFixed(1)}MB`));
+        }
         const lines = wordWrap(msg, loggerSys.getColumns());
         debugPrefix(lines);
         console.log(lines.join('\n'));
