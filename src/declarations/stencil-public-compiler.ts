@@ -816,7 +816,7 @@ export interface CompilerSystem {
    * SYNC! Always returns a boolean, does not throw.
    */
   accessSync(p: string): boolean;
-  applyGlobalPatch?(fromDir: string): void;
+  applyGlobalPatch?(fromDir: string): Promise<void>;
   cacheStorage?: CacheStorage;
   copy?(copyTasks: Required<CopyTask>[], srcDir: string): Promise<CopyResults>;
   /**
@@ -872,6 +872,7 @@ export interface CompilerSystem {
    */
   isSymbolicLink(p: string): Promise<boolean>;
   lazyRequire?: LazyRequire;
+  loadTypeScript(opts: { typeScriptPath: string; rootDir: string; sync: boolean; dependencies: CompilerDependency[] }): any;
   /**
    * Does not throw.
    */
@@ -887,6 +888,7 @@ export interface CompilerSystem {
   normalizePath(p: string): string;
   onProcessInterrupt?(cb: () => void): void;
   platformPath: PlatformPath;
+  preloadDependencies?(opts: { rootDir: string; dependencies: CompilerDependency[] }): Promise<void>;
   /**
    * All return paths are full normalized paths, not just the file names. Always returns an array, does not throw.
    */
@@ -984,6 +986,13 @@ export interface PlatformPath {
   delimiter: string;
   posix: any;
   win32: any;
+}
+
+export interface CompilerDependency {
+  name: string;
+  version: string;
+  main: string;
+  resources?: string[];
 }
 
 export interface ResolveModuleIdOptions {

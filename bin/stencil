@@ -36,10 +36,15 @@ if (process.argv.indexOf('--next') > -1) {
   console.warn('\nThe next compiler is now the default and the --next flag is no longer needed.\n');
 }
 
+if (typeof globalThis === 'undefined') {
+  // globalThis not added until node 12
+  global.globalThis = global;
+}
+
 var cli = require('../cli/index.cjs.js');
 var nodeApi = require('../sys/node/index.js');
 var nodeLogger = nodeApi.createNodeLogger({ process: process });
-var nodeSys = nodeApi.createNodeSysWithWatch({ process: process });
+var nodeSys = nodeApi.createNodeSysWithWatch({ process: process, logger: nodeLogger });
 
 nodeApi.setupNodeProcess({ process: process, logger: nodeLogger });
 
@@ -47,5 +52,5 @@ cli.run({
   args: process.argv.slice(2),
   logger: nodeLogger,
   sys: nodeSys,
-  checkVersion: nodeApi.checkVersion
+  checkVersion: nodeApi.checkVersion,
 });

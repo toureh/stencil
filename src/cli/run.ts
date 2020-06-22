@@ -2,6 +2,7 @@ import type { CliInitOptions } from '../declarations';
 import { hasError, isFunction, shouldIgnoreError } from '@utils';
 import { loadCoreCompiler } from './load-compiler';
 import { parseFlags } from './parse-flags';
+import { startupLog as logStartup, loadedCompilerLog as logCompilerLoaded } from './logs';
 import { taskBuild } from './task-build';
 import { taskDocs } from './task-docs';
 import { taskGenerate } from './task-generate';
@@ -10,13 +11,13 @@ import { taskInfo } from './task-info';
 import { taskPrerender } from './task-prerender';
 import { taskServe } from './task-serve';
 import { taskTest } from './task-test';
-import { taskVersion } from './task-version';
+import { version } from '../version';
 
 export async function run(init: CliInitOptions) {
   const { args, logger, sys, checkVersion } = init;
 
   try {
-    const flags = parseFlags(args);
+    const flags = parseFlags(sys, args);
 
     if (flags.ci) {
       logger.enableColors(false);
@@ -26,17 +27,25 @@ export async function run(init: CliInitOptions) {
       sys.applyGlobalPatch(sys.getCurrentDirectory());
     }
 
-    const coreCompiler = await loadCoreCompiler(sys);
     if (flags.task === 'version' || flags.version) {
-      return taskVersion(coreCompiler);
+      console.log(version);
+      return;
     }
 
     if (flags.task === 'help' || flags.help) {
-      return taskHelp(sys, logger);
+      taskHelp(sys, logger);
+      return;
     }
 
+    logStartup(logger, flags);
+
+    const coreCompiler = await loadCoreCompiler(sys);
+
+    logCompilerLoaded(sys, logger, flags, coreCompiler);
+
     if (flags.task === 'info') {
-      return taskInfo(coreCompiler, sys, logger);
+      taskInfo(coreCompiler, sys, logger);
+      return;
     }
 
     const validated = await coreCompiler.loadConfig({

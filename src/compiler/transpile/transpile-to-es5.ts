@@ -2,9 +2,9 @@ import * as d from '../../declarations';
 import { loadTypeScriptDiagnostics, hasError } from '@utils';
 import { loadTypescript } from '../sys/typescript/typescript-load';
 
-export const transpileToEs5 = async (input: string, inlineHelpers: boolean) => {
+export const transpileToEs5 = async (sys: d.CompilerSystem, rootDir: string, input: string, inlineHelpers: boolean) => {
   const diagnostics: d.Diagnostic[] = [];
-  const ts = await loadTypescript(null, diagnostics, null);
+  const ts = await loadTypescript(sys, diagnostics, rootDir, null, false);
 
   const results: d.TranspileToEs5Results = {
     sourceFilePath: null,

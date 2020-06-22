@@ -2543,10 +2543,16 @@ export interface VNodeProdData {
 export interface CompilerWorkerContext {
   transpile(code: string, opts: TranspileOptions): Promise<TranspileResults>;
   optimizeCss(inputOpts: OptimizeCssInput): Promise<OptimizeCssOutput>;
-  prepareModule(input: string, minifyOpts: any, transpile: boolean, inlineHelpers: boolean): Promise<{ output: string; sourceMap: any; diagnostics: Diagnostic[] }>;
+  prepareModule(
+    rootDir: string,
+    input: string,
+    minifyOpts: any,
+    transpile: boolean,
+    inlineHelpers: boolean,
+  ): Promise<{ output: string; sourceMap: any; diagnostics: Diagnostic[] }>;
   prerenderWorker(prerenderRequest: PrerenderUrlRequest): Promise<PrerenderUrlResults>;
   transformCssToEsm(input: TransformCssToEsmInput): Promise<TransformCssToEsmOutput>;
-  transpileToEs5(input: string, inlineHelpers: boolean): Promise<TranspileToEs5Results>;
+  transpileToEs5(rootDir: string, input: string, inlineHelpers: boolean): Promise<TranspileToEs5Results>;
 }
 
 export interface MsgToWorker {

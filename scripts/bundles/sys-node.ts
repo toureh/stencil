@@ -53,10 +53,6 @@ export async function sysNode(opts: BuildOptions) {
     },
     external: ['child_process', 'crypto', 'events', 'https', 'path', 'readline', 'os', 'util'],
     plugins: [
-      rollupResolve({
-        preferBuiltins: true,
-      }),
-      prettyMinifyPlugin(opts),
       {
         name: 'sysNodeWorkerAlias',
         resolveId(id) {
@@ -68,6 +64,11 @@ export async function sysNode(opts: BuildOptions) {
           }
         },
       },
+      rollupResolve({
+        preferBuiltins: true,
+      }),
+      aliasPlugin(opts),
+      prettyMinifyPlugin(opts),
     ],
   };
 

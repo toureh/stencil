@@ -58,7 +58,7 @@ const runPrerender = async (config: d.Config, hydrateAppFilePath: string, compon
     let workerCtrl: d.WorkerMainController;
 
     if (config.sys.createWorkerController == null || config.maxConcurrentWorkers < 1) {
-      workerCtx = createWorkerContext();
+      workerCtx = createWorkerContext(config.sys);
     } else {
       workerCtrl = config.sys.createWorkerController(config.maxConcurrentWorkers);
       workerCtx = createWorkerMainContext(workerCtrl);

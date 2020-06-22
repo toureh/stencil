@@ -11,12 +11,15 @@ import {
   CompilerSystemWriteFileResults,
   CompilerSystemRenameResults,
   CompilerSystemUnlinkResults,
+  CompilerDependency,
 } from '../../declarations';
 import platformPath from 'path-browserify';
 import { buildEvents } from '../events';
 import { createWebWorkerMainController } from './worker/web-worker-main';
-import { HAS_WEB_WORKER, IS_NODE_ENV, IS_WEB_WORKER_ENV, normalizePath, isRootPath } from '@utils';
+import { HAS_WEB_WORKER, IS_BROWSER_ENV, IS_WEB_WORKER_ENV, normalizePath, isBoolean, isRootPath, noop } from '@utils';
+import { getRemoteDependencyUrl } from './dependencies';
 import { resolveModuleIdAsync } from './resolve/resolve-module-async';
+import type TypeScript from 'typescript';
 
 export const createSystem = () => {
   const items = new Map<string, FsItem>();
@@ -25,7 +28,7 @@ export const createSystem = () => {
   const addDestory = (cb: () => void) => destroys.add(cb);
   const removeDestory = (cb: () => void) => destroys.delete(cb);
   const events = buildEvents();
-  const { basename, dirname } = platformPath;
+  const { basename, dirname, resolve } = platformPath;
 
   const destroy = async () => {
     const waits: Promise<void>[] = [];
@@ -69,24 +72,78 @@ export const createSystem = () => {
 
   const encodeToBase64 = (str: string) => btoa(unescape(encodeURIComponent(str)));
 
-  const getCurrentDirectory = () => {
-    if (IS_NODE_ENV) {
-      return global['process'].cwd();
-    }
-    return '/';
-  };
+  const getCurrentDirectory = () => '/';
 
   const getCompilerExecutingPath = () => {
-    if (IS_NODE_ENV) {
-      return __filename;
-    }
     if (IS_WEB_WORKER_ENV) {
       return location.href;
     }
-    throw new Error('unable to find executing path');
+    return getRemoteDependencyUrl(sys, '@stencil/core');
   };
 
   const isSymbolicLink = async (_p: string) => false;
+
+  const loadTypeScript = (opts: { typeScriptPath: string; rootDir: string; sync: boolean; dependencies: CompilerDependency[] }) => {
+    const glb = globalThis as any;
+    if (glb.ts) {
+      // check if the global object has "ts" on it
+      // could be browser main thread or browser web worker
+      return patchImportedTsSys(glb.ts, opts.typeScriptPath);
+    }
+
+    const tsUrl = opts.typeScriptPath || getRemoteDependencyUrl(sys, 'typescript');
+    if (IS_WEB_WORKER_ENV) {
+      // browser web worker
+      // importScripts() will be synchronous within a web worker
+      glb.importScripts(tsUrl);
+      if (glb.ts) {
+        return patchImportedTsSys(glb.ts, tsUrl);
+      }
+    }
+
+    if (opts.sync) {
+      throw new Error(`TypeScript "ts" must already be available on the global scope`);
+    }
+
+    if (IS_BROWSER_ENV) {
+      // browser main thread
+      return new Promise((resolve, reject) => {
+        const scriptElm = document.createElement('script');
+        scriptElm.onload = () => resolve(patchImportedTsSys(glb.ts, tsUrl));
+        scriptElm.onerror = ev => reject(ev);
+        scriptElm.src = tsUrl;
+      });
+    }
+    return null;
+  };
+
+  const patchImportedTsSys = (importedTs: typeof TypeScript, tsUrl: string) => {
+    const tsSys: TypeScript.System = (importedTs.sys = importedTs.sys || ({} as any));
+    tsSys.getExecutingFilePath = () => tsUrl;
+
+    if (!tsSys.getCurrentDirectory) {
+      tsSys.getCurrentDirectory = getCurrentDirectory;
+    }
+    if (!tsSys.args) {
+      tsSys.args = [];
+    }
+    if (!tsSys.newLine) {
+      tsSys.newLine = '\n';
+    }
+    if (!isBoolean(tsSys.useCaseSensitiveFileNames)) {
+      tsSys.useCaseSensitiveFileNames = false;
+    }
+    if (!tsSys.exit) {
+      tsSys.exit = noop;
+    }
+    if (!tsSys.resolvePath) {
+      tsSys.resolvePath = p => resolve(p);
+    }
+    if (!tsSys.write) {
+      tsSys.write = noop;
+    }
+    return importedTs;
+  };
 
   const mkdirSync = (p: string, opts?: CompilerSystemMakeDirectoryOptions) => {
     p = normalize(p);
@@ -520,6 +577,7 @@ export const createSystem = () => {
     getCurrentDirectory,
     getCompilerExecutingPath,
     isSymbolicLink,
+    loadTypeScript,
     mkdir,
     mkdirSync,
     nextTick,

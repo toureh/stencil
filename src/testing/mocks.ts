@@ -84,7 +84,7 @@ export function mockCompilerCtx(config?: Config) {
     reset: () => {
       /**/
     },
-    worker: createWorkerContext(),
+    worker: createWorkerContext(config.sys),
   };
 
   Object.defineProperty(compilerCtx, 'fs', {

@@ -1,18 +1,18 @@
 import * as d from '../../../declarations';
 import { hasError } from '@utils';
-import { loadTypescript, loadTypescriptSync, TypeScriptModule } from './typescript-load';
+import { loadTypescript, TypeScriptModule } from './typescript-load';
 import { patchTypeScriptResolveModule } from './typescript-resolve-module';
 import { patchTypeScriptSys, patchTypeScriptGetParsedCommandLineOfConfigFile } from './typescript-sys';
 import ts from 'typescript';
 
 export const patchTypescript = async (config: d.Config, diagnostics: d.Diagnostic[], inMemoryFs: d.InMemoryFileSystem) => {
   // dynamically load the typescript dependency
-  const loadedTs = await loadTypescript(config.sys, diagnostics, config.typescriptPath);
+  const loadedTs = await loadTypescript(config.sys, diagnostics, config.rootDir, config.typescriptPath, false);
   patchTypescriptModule(config, diagnostics, inMemoryFs, loadedTs);
 };
 
 export const patchTypescriptSync = (config: d.Config, diagnostics: d.Diagnostic[], inMemoryFs: d.InMemoryFileSystem) => {
-  const loadedTs = loadTypescriptSync(config.sys, diagnostics, config.typescriptPath);
+  const loadedTs = loadTypescript(config.sys, diagnostics, config.rootDir, config.typescriptPath, true) as TypeScriptModule;
   patchTypescriptModule(config, diagnostics, inMemoryFs, loadedTs);
 };
 

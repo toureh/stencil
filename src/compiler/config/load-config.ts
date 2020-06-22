@@ -1,12 +1,12 @@
+import type { CompilerSystem, Config, Diagnostic, LoadConfigInit, LoadConfigResults } from '../../declarations';
+import type TypeScript from 'typescript';
 import { buildError, catchError, isString, normalizePath, hasError, IS_NODE_ENV } from '@utils';
-import { CompilerSystem, Config, Diagnostic, LoadConfigInit, LoadConfigResults } from '../../declarations';
 import { createBrowserLogger } from '../sys/logger/browser-logger';
 import { createSystem } from '../sys/stencil-sys';
 import { dirname, isAbsolute, join, resolve } from 'path';
 import { loadTypescript } from '../sys/typescript/typescript-load';
 import { validateConfig } from './validate-config';
 import { validateTsConfig } from '../sys/typescript/typescript-config';
-import type TypeScript from 'typescript';
 
 export const loadConfig = async (init: LoadConfigInit = {}) => {
   const results: LoadConfigResults = {
@@ -21,7 +21,6 @@ export const loadConfig = async (init: LoadConfigInit = {}) => {
     const sys = init.sys || createSystem();
     const config = init.config || {};
     const cwd = sys.getCurrentDirectory();
-    const tsPromise = loadTypescript(sys, results.diagnostics, init.typescriptPath);
     let configPath = init.configPath || config.configPath;
     let isDefaultConfigPath = true;
 
@@ -54,7 +53,7 @@ export const loadConfig = async (init: LoadConfigInit = {}) => {
     } else {
       // no stencil.config.ts or .js file, which is fine
       // #0CJS ¯\_(ツ)_/¯
-      results.config = Object.assign({}, config);
+      results.config = { ...config };
       results.config.configPath = null;
       results.config.rootDir = normalizePath(cwd);
     }
@@ -80,7 +79,7 @@ export const loadConfig = async (init: LoadConfigInit = {}) => {
     results.config.logger = init.logger || results.config.logger || createBrowserLogger();
     results.config.logger.setLevel(results.config.logLevel);
 
-    const loadedTs = await tsPromise;
+    const loadedTs = await loadTypescript(sys, results.diagnostics, results.config.rootDir, init.typescriptPath, false);
     if (!hasError(results.diagnostics)) {
       const tsConfigResults = await validateTsConfig(loadedTs, results.config, sys, init);
       results.diagnostics.push(...tsConfigResults.diagnostics);
@@ -100,7 +99,7 @@ export const loadConfig = async (init: LoadConfigInit = {}) => {
   return results;
 };
 
-const loadConfigFile = async (sys: CompilerSystem, diagnostics: Diagnostic[], configPath: string, isDefaultConfigPath: boolean, typescriptPath: string) => {
+const loadConfigFile = async (sys: CompilerSystem, diagnostics: Diagnostic[], configPath: string, isDefaultConfigPath: boolean, typeScriptPath: string) => {
   let config: Config = null;
 
   let hasConfigFile = false;
@@ -120,7 +119,7 @@ const loadConfigFile = async (sys: CompilerSystem, diagnostics: Diagnostic[], co
         hasConfigFile = true;
       } else if (stat.isDirectory()) {
         // this is only a directory, so let's make some assumptions
-        for (const configName of CONFIG_FILENAMES) {
+        for (const configName of ['stencil.config.ts', 'stencil.config.js']) {
           const testConfigFilePath = join(configPath, configName);
           const stat = await sys.stat(testConfigFilePath);
           if (stat && stat.isFile()) {
@@ -136,7 +135,7 @@ const loadConfigFile = async (sys: CompilerSystem, diagnostics: Diagnostic[], co
   if (hasConfigFile) {
     // the passed in config was a string, so it's probably a path to the config we need to load
     // first clear the require cache so we don't get the same file
-    const configFileData = await evaluateConfigFile(sys, diagnostics, configPath, typescriptPath);
+    const configFileData = await evaluateConfigFile(sys, diagnostics, configPath, typeScriptPath);
     if (hasError(diagnostics)) {
       return config;
     }
@@ -154,14 +153,12 @@ const loadConfigFile = async (sys: CompilerSystem, diagnostics: Diagnostic[], co
   return config;
 };
 
-const CONFIG_FILENAMES = ['stencil.config.ts', 'stencil.config.js'];
-
-const evaluateConfigFile = async (sys: CompilerSystem, diagnostics: Diagnostic[], configFilePath: string, typescriptPath: string) => {
+const evaluateConfigFile = async (sys: CompilerSystem, diagnostics: Diagnostic[], configFilePath: string, typeScriptPath: string) => {
   let configFileData: { config?: Config } = null;
 
   try {
-    // TODO: this should use sys for resolving
-    const ts = await loadTypescript(sys, diagnostics, typescriptPath);
+    const rootDir = sys.platformPath.dirname(configFilePath);
+    const ts = await loadTypescript(sys, diagnostics, rootDir, typeScriptPath, false);
 
     if (IS_NODE_ENV) {
       // ensure we cleared out node's internal require() cache for this file

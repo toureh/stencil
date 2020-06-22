@@ -1,14 +1,14 @@
 import type { Config, CheckVersion, DevServer } from '../declarations';
 import type { CoreCompiler } from './load-compiler';
 import { runPrerenderTask } from './task-prerender';
-import { startupLog } from './startup-log';
+import { startupCompilerLog } from './logs';
 
 export async function taskWatch(coreCompiler: CoreCompiler, config: Config, checkVersion: CheckVersion) {
   let devServer: DevServer = null;
   let exitCode = 0;
 
   try {
-    startupLog(coreCompiler, config);
+    startupCompilerLog(coreCompiler, config);
 
     const checkVersionPromise = checkVersion ? checkVersion(config, coreCompiler.version) : null;
     const compiler = await coreCompiler.createCompiler(config);

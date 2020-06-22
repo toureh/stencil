@@ -1,7 +1,7 @@
-import type { ConfigFlags } from '../declarations';
+import type { CompilerSystem, ConfigFlags } from '../declarations';
 import { dashToPascalCase } from '@utils';
 
-export function parseFlags(args: string[]): ConfigFlags {
+export function parseFlags(_sys: CompilerSystem, args: string[]): ConfigFlags {
   const flags: any = {
     task: null,
     args: [],
@@ -16,14 +16,14 @@ export function parseFlags(args: string[]): ConfigFlags {
   }
   parseArgs(flags, flags.args, flags.knownArgs);
 
-  const envArgs = getEnvironmentArgs();
-  parseArgs(flags, envArgs, flags.knownArgs);
+  // const envArgs = getEnvironmentArgs(sys);
+  // parseArgs(flags, envArgs, flags.knownArgs);
 
-  envArgs.forEach(envArg => {
-    if (!flags.args.includes(envArg)) {
-      flags.args.push(envArg);
-    }
-  });
+  // envArgs.forEach(envArg => {
+  //   if (!flags.args.includes(envArg)) {
+  //     flags.args.push(envArg);
+  //   }
+  // });
 
   if (flags.task != null) {
     const i = flags.args.indexOf(flags.task);
@@ -201,20 +201,20 @@ const ARG_OPTS = {
   },
 };
 
-function getEnvironmentArgs() {
-  // process.env.npm_config_argv
-  // {"remain":["4444"],"cooked":["run","serve","--port","4444"],"original":["run","serve","--port","4444"]}
-  let args: string[] = [];
-  try {
-    if (typeof process !== 'undefined' && process.env) {
-      const npmConfigArgs = process.env.npm_config_argv;
-      if (npmConfigArgs) {
-        args = JSON.parse(npmConfigArgs).original as string[];
-        if (args[0] === 'run') {
-          args = args.slice(2);
-        }
-      }
-    }
-  } catch (e) {}
-  return args;
-}
+// function getEnvironmentArgs(sys: CompilerSystem) {
+//   // process.env.npm_config_argv
+//   // {"remain":["4444"],"cooked":["run","serve","--port","4444"],"original":["run","serve","--port","4444"]}
+//   let args: string[] = [];
+//   try {
+//     if (sys.details.runtime === 'node' && typeof process !== 'undefined' && process.env) {
+//       const npmConfigArgs = process.env.npm_config_argv;
+//       if (npmConfigArgs) {
+//         args = JSON.parse(npmConfigArgs).original as string[];
+//         if (args[0] === 'run') {
+//           args = args.slice(2);
+//         }
+//       }
+//     }
+//   } catch (e) {}
+//   return args;
+// }

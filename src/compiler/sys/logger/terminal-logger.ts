@@ -134,7 +134,11 @@ export const createTerminalLogger = (loggerSys: TerminalLoggerSys) => {
     if (debug) {
       if (shouldLog('debug')) {
         const m = [msg];
-        m.push(dim(` MEM: ${(loggerSys.memoryUsage() / 1000000).toFixed(1)}MB`));
+        const mem = loggerSys.memoryUsage();
+        if (mem > 0) {
+          m.push(dim(` MEM: ${(mem / 1000000).toFixed(1)}MB`));
+        }
+        
         const lines = wordWrap(m, loggerSys.getColumns());
         debugPrefix(lines);
         console.log(lines.join('\n'));

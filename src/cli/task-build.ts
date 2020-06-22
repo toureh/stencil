@@ -1,7 +1,7 @@
 import type { Config, CheckVersion } from '../declarations';
 import type { CoreCompiler } from './load-compiler';
 import { runPrerenderTask } from './task-prerender';
-import { startupLog } from './startup-log';
+import { startupCompilerLog } from './logs';
 import { taskWatch } from './task-watch';
 
 export async function taskBuild(coreCompiler: CoreCompiler, config: Config, checkVersion: CheckVersion) {
@@ -15,7 +15,7 @@ export async function taskBuild(coreCompiler: CoreCompiler, config: Config, chec
   let exitCode = 0;
 
   try {
-    startupLog(coreCompiler, config);
+    startupCompilerLog(coreCompiler, config);
 
     const checkVersionPromise = checkVersion ? checkVersion(config, coreCompiler.version) : null;
     const compiler = await coreCompiler.createCompiler(config);

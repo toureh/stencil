@@ -20,9 +20,6 @@ if (typeof globalThis === 'undefined') {
   if (!process.argv) {
     process.argv = [''];
   }
-  if (!process.binding) {
-    process.binding = () => ({});
-  }
   let cwd = '/';
   if (!process.cwd) {
     process.cwd = () => cwd;

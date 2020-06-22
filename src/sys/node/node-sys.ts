@@ -1,16 +1,16 @@
-import { CompilerSystem, SystemDetails, CompilerSystemUnlinkResults, CompilerSystemMakeDirectoryResults, CompilerSystemWriteFileResults } from '../../declarations';
+import { CompilerSystem, Logger, SystemDetails, CompilerSystemUnlinkResults, CompilerSystemMakeDirectoryResults, CompilerSystemWriteFileResults } from '../../declarations';
 import { asyncGlob, nodeCopyTasks } from './node-copy-tasks';
 import { cpus, freemem, platform, release, tmpdir, totalmem } from 'os';
 import { createHash } from 'crypto';
+import exit from 'exit';
 import fs from 'graceful-fs';
-import { normalizePath, requireFunc } from '@utils';
-import path from 'path';
 import { NodeLazyRequire } from './node-lazy-require';
 import { NodeResolveModule } from './node-resolve-module';
-import exit from 'exit';
-import { NodeWorkerController } from './worker/worker-controller';
+import { NodeWorkerController } from './node-worker-controller';
+import { normalizePath, requireFunc } from '@utils';
+import path from 'path';
 
-export function createNodeSys(c: { process: any }) {
+export function createNodeSys(c: { process: any; logger: Logger }) {
   const prcs: NodeJS.Process = c.process;
   const destroys = new Set<() => Promise<void> | void>();
   const onInterruptsCallbacks: (() => void)[] = [];
@@ -114,6 +114,10 @@ export function createNodeSys(c: { process: any }) {
           resolve(false);
         }
       });
+    },
+    loadTypeScript(opts) {
+      const nodeModuleId = opts.typeScriptPath || 'typescript';
+      return require(nodeModuleId);
     },
     mkdir(p, opts) {
       return new Promise(resolve => {

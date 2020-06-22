@@ -1,4 +1,4 @@
-import { CompilerSystem } from '../../declarations';
+import { CompilerDependency, CompilerSystem } from '../../declarations';
 import { getRemoteModuleUrl } from '../sys/fetch/fetch-utils';
 import { rollupVersion, version, terserVersion, typescriptVersion } from '../../version';
 
@@ -78,10 +78,3 @@ export const dependencies: CompilerDependency[] = [
     main: '/dist/bundle.min.js',
   },
 ];
-
-export interface CompilerDependency {
-  name: string;
-  version: string;
-  main: string;
-  resources?: string[];
-}

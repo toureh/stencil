@@ -1,18 +1,16 @@
 import * as d from '../../../declarations';
-import { basename, join, resolve } from 'path';
+import { basename, join } from 'path';
 import { fetchUrlSync } from '../fetch/fetch-module-sync';
-import { isBoolean, isFunction, isString, IS_CASE_SENSITIVE_FILE_NAMES, IS_WEB_WORKER_ENV, noop, normalizePath } from '@utils';
+import { IS_CASE_SENSITIVE_FILE_NAMES, IS_WEB_WORKER_ENV, isFunction, isString, normalizePath } from '@utils';
 import { isExternalUrl } from '../fetch/fetch-utils';
 import { TypeScriptModule } from './typescript-load';
 import ts from 'typescript';
 
 export const patchTypeScriptSys = (loadedTs: TypeScriptModule, config: d.Config, inMemoryFs: d.InMemoryFileSystem) => {
-  const stencilSys = config.sys;
   loadedTs.sys = loadedTs.sys || ({} as ts.System);
 
-  patchTsSystemFileSystem(config, stencilSys, inMemoryFs, loadedTs.sys);
-  patchTsSystemWatch(stencilSys, loadedTs.sys);
-  patchTsSystemUtils(loadedTs.sys);
+  patchTsSystemFileSystem(config, config.sys, inMemoryFs, loadedTs.sys);
+  patchTsSystemWatch(config.sys, loadedTs.sys);
 };
 
 export const patchTsSystemFileSystem = (config: d.Config, stencilSys: d.CompilerSystem, inMemoryFs: d.InMemoryFileSystem, tsSys: ts.System) => {
@@ -50,6 +48,8 @@ export const patchTsSystemFileSystem = (config: d.Config, stencilSys: d.Compiler
       return { files: [], directories: [] };
     }
   };
+
+  tsSys.getCurrentDirectory = stencilSys.getCurrentDirectory;
 
   tsSys.createDirectory = p => {
     stencilSys.mkdirSync(p, { recursive: true });
@@ -157,36 +157,6 @@ export const getTypescriptPathFromUrl = (rootDir: string, tsExecutingUrl: string
     return normalizePath(tsNodePath);
   }
   return url;
-};
-
-export const patchTsSystemUtils = (tsSys: ts.System) => {
-  if (!tsSys.getCurrentDirectory) {
-    tsSys.getCurrentDirectory = () => '/';
-  }
-
-  if (!tsSys.args) {
-    tsSys.args = [];
-  }
-
-  if (!tsSys.newLine) {
-    tsSys.newLine = '\n';
-  }
-
-  if (!isBoolean(tsSys.useCaseSensitiveFileNames)) {
-    tsSys.useCaseSensitiveFileNames = IS_CASE_SENSITIVE_FILE_NAMES;
-  }
-
-  if (!tsSys.exit) {
-    tsSys.exit = noop;
-  }
-
-  if (!tsSys.resolvePath) {
-    tsSys.resolvePath = p => resolve(p);
-  }
-
-  if (!tsSys.write) {
-    tsSys.write = noop;
-  }
 };
 
 export const patchTypeScriptGetParsedCommandLineOfConfigFile = (loadedTs: TypeScriptModule, _config: d.Config) => {

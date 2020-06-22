@@ -7,18 +7,48 @@ import type {
   CompilerSystemMakeDirectoryResults,
   CompilerSystemWriteFileResults,
   Logger,
+  PackageJsonData,
 } from '../../declarations';
-import { applyNodeCompat, applyNodeRequire } from './deno-node-compat';
 import { basename, delimiter, dirname, extname, isAbsolute, join, normalize, parse, relative, resolve, sep, win32, posix } from './deps';
 import { createDenoWorkerMainController } from './deno-worker-main';
 import { denoCopyTasks } from './deno-copy-tasks';
-import { normalizePath } from '@utils';
+import { normalizePath, noop } from '@utils';
 import type { Deno as DenoTypes } from '../../../types/lib.deno';
+import type TypeScript from 'typescript';
 
 export function createDenoSys(c: { Deno: any; logger: Logger }) {
   let tmpDir: string = null;
   const deno: typeof DenoTypes = c.Deno;
   const destroys = new Set<() => Promise<void> | void>();
+
+  const getRemoteModuleUrl = (module: { moduleId: string; path: string; version?: string }) => {
+    const npmBaseUrl = 'https://cdn.jsdelivr.net/npm/';
+    const path = `${module.moduleId}${module.version ? '@' + module.version : ''}/${module.path}`;
+    return new URL(path, npmBaseUrl).href;
+  };
+
+  const getModulePath = (rootDir: string, moduleId: string, path: string) => join(rootDir, 'node_modules', moduleId, path);
+
+  const fetchAndWrite = async (opts: { url: string; filePath: string }) => {
+    try {
+      await deno.stat(opts.filePath);
+      return;
+    } catch (e) {}
+
+    try {
+      const rsp = await fetch(opts.url);
+      if (rsp.ok) {
+        const content = await rsp.clone().text();
+        const encoder = new TextEncoder();
+        await deno.writeFile(opts.filePath, encoder.encode(content));
+        c.logger.debug('fetch', opts.url, opts.filePath);
+      } else {
+        c.logger.warn('fetch', opts.url, rsp.status);
+      }
+    } catch (e) {
+      c.logger.error(e);
+    }
+  };
 
   const sys: CompilerSystem = {
     async access(p) {
@@ -76,9 +106,14 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
     exit(exitCode) {
       deno.exit(exitCode);
     },
+    getCompilerExecutingPath() {
+      const current = new URL('../../compiler/stencil.js', import.meta.url);
+      return normalizePath(current.pathname);
+    },
     getCurrentDirectory() {
       return normalizePath(deno.cwd());
     },
+    getRemoteModuleUrl,
     glob(_pattern, _opts) {
       return null;
     },
@@ -90,11 +125,98 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
         return false;
       }
     },
-    getCompilerExecutingPath() {
-      const current = new URL('../../compiler/stencil.js', import.meta.url);
-      return normalizePath(current.pathname);
+    async loadTypeScript(opts) {
+      const tsDep = opts.dependencies.find(dep => dep.name === 'typescript');
+
+      let tsFilePath = opts.typeScriptPath;
+      if (!tsFilePath) {
+        tsFilePath = getModulePath(opts.rootDir, tsDep.name, tsDep.main);
+        await fetchAndWrite({
+          url: getRemoteModuleUrl({ moduleId: tsDep.name, version: tsDep.version, path: tsDep.main }),
+          filePath: tsFilePath,
+        });
+      }
+
+      // ensure typescript compiler doesn't think it's nodejs
+      (globalThis as any).process.browser = true;
+
+      const orgModule = (globalThis as any).module;
+      (globalThis as any).module = { exports: {} };
+      await import(tsFilePath);
+      const importedTs = (globalThis as any).module.exports;
+
+      delete (globalThis as any).process.browser;
+      if (orgModule) {
+        (globalThis as any).module = orgModule;
+      } else {
+        delete (globalThis as any).module;
+      }
+
+      // create half-baked sys just to get us going
+      // later on we'll wire up ts sys w/ the actual stencil sys
+      const tsSys: TypeScript.System = {
+        args: [],
+        createDirectory: noop,
+        directoryExists: p => {
+          try {
+            const s = deno.statSync(p);
+            return s.isDirectory;
+          } catch (e) {}
+          return false;
+        },
+        exit: deno.exit,
+        fileExists: p => {
+          try {
+            const s = deno.statSync(p);
+            return s.isFile;
+          } catch (e) {}
+          return false;
+        },
+        getCurrentDirectory: deno.cwd,
+        getDirectories: () => [],
+        getExecutingFilePath: () => tsFilePath,
+        newLine: '\n',
+        readDirectory: () => [],
+        readFile: (p, encoding) => {
+          try {
+            const decoder = new TextDecoder(encoding);
+            const data = deno.readFileSync(p);
+            return decoder.decode(data);
+          } catch (e) {}
+          return undefined;
+        },
+        resolvePath: p => resolve(p),
+        useCaseSensitiveFileNames: deno.build.os !== 'windows',
+        write: noop,
+        writeFile: noop,
+      };
+      importedTs.sys = tsSys;
+
+      return importedTs;
     },
-    normalizePath,
+    async preloadDependencies(opts) {
+      const tsDep = opts.dependencies.find(dep => dep.name === 'typescript');
+
+      try {
+        const decoder = new TextDecoder('utf-8');
+        const pkgContent = await deno.readFile(getModulePath(opts.rootDir, tsDep.name, tsDep.main));
+        const pkgData: PackageJsonData = JSON.parse(decoder.decode(pkgContent));
+        if (pkgData.version === tsDep.version) {
+          return;
+        }
+      } catch (e) {}
+
+      const timespace = c.logger.createTimeSpan(`preloadDependencies start`, true);
+
+      const preloadUrls = tsDep.resources.map(p => ({
+        url: getRemoteModuleUrl({ moduleId: tsDep.name, version: tsDep.version, path: p }),
+        filePath: join(opts.rootDir, tsDep.name, p),
+      }));
+
+      await Promise.all(preloadUrls.map(fetchAndWrite));
+
+      timespace.finish(`preloadDependencies end`);
+    },
     async mkdir(p, opts) {
       const results: CompilerSystemMakeDirectoryResults = {
         basename: basename(p),
@@ -129,6 +251,7 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
       // https://doc.deno.land/https/github.com/denoland/deno/releases/latest/download/lib.deno.d.ts#queueMicrotask
       queueMicrotask(cb);
     },
+    normalizePath,
     platformPath: {
       basename,
       dirname,
@@ -442,10 +565,11 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
       runtimeVersion: deno.version.deno,
       totalmem: 0,
     },
-    applyGlobalPatch: applyNodeRequire,
+    applyGlobalPatch: async fromDir => {
+      const { applyNodeCompat } = await import('@deno-node-compat');
+      applyNodeCompat({ fromDir });
+    },
   };
-
-  applyNodeCompat(deno, globalThis);
 
   return sys;
 }

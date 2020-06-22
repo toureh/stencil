@@ -4,7 +4,7 @@ import { createWorkerMainContext } from '../../worker/main-thread';
 
 export const createSysWorker = (sys: CompilerSystem, maxConcurrentWorkers: number) => {
   if (sys.createWorkerController == null || maxConcurrentWorkers < 1) {
-    return createWorkerContext();
+    return createWorkerContext(sys);
   }
 
   const workerCtrl = sys.createWorkerController(maxConcurrentWorkers);

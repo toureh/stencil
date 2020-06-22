@@ -77,6 +77,14 @@ export async function compiler(opts: BuildOptions) {
           return null;
         },
       },
+      replacePlugin(opts),
+      {
+        name: 'hackReplace',
+        transform(code) {
+          code = code.replace(` || Object.keys(process.binding('natives'))`, '');
+          return code;
+        }
+      },
       inlinedCompilerPluginsPlugin(opts, inputDir),
       parse5Plugin(opts),
       sizzlePlugin(opts),
@@ -89,7 +97,6 @@ export async function compiler(opts: BuildOptions) {
       rollupCommonjs({
         transformMixedEsModules: false,
       }),
-      replacePlugin(opts),
       rollupJson({
         preferConst: true,
       }),

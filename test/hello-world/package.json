@@ -5,7 +5,7 @@
     "dist/"
   ],
   "scripts": {
-    "build": "node ../../bin/stencil build --prerender",
+    "build": "node ../../bin/stencil build --debug",
     "start": "node ../../bin/stencil build --dev --watch --serve",
     "start.prod": "node ../../bin/stencil build --watch --serve"
   },

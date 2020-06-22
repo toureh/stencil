@@ -1,10 +1,10 @@
 import type { BuildResultsComponentGraph, Config, Diagnostic } from '../declarations';
 import type { CoreCompiler } from './load-compiler';
 import { catchError } from '@utils';
-import { startupLog } from './startup-log';
+import { startupCompilerLog } from './logs';
 
 export async function taskPrerender(coreCompiler: CoreCompiler, config: Config) {
-  startupLog(coreCompiler, config);
+  startupCompilerLog(coreCompiler, config);
 
   const hydrateAppFilePath = config.flags.unknownArgs[0];
 

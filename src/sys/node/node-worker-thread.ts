@@ -1,4 +1,4 @@
-import type * as d from '../../../declarations';
+import type * as d from '../../declarations';
 
 export const initNodeWorkerThread = (prcs: NodeJS.Process, msgHandler: d.WorkerMsgHandler) => {
   const sendHandle = (err: NodeJS.ErrnoException) => {

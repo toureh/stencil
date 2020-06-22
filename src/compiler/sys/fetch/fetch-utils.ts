@@ -3,6 +3,7 @@ import { isFunction, isString, normalizePath } from '@utils';
 import { isCommonDirModuleFile, isTsFile, isTsxFile } from '../resolve/resolve-utils';
 
 export const httpFetch = (sys: d.CompilerSystem, input: RequestInfo, init?: RequestInit): Promise<Response> => {
+  console.trace(input);
   if (sys && isFunction(sys.fetch)) {
     return sys.fetch(input, init);
   }
@@ -25,9 +26,9 @@ export const getRemoteModuleUrl = (sys: d.CompilerSystem, module: { moduleId: st
     return sys.getRemoteModuleUrl(module);
   }
 
-  const nmBaseUrl = 'https://cdn.jsdelivr.net/npm/';
+  const npmBaseUrl = 'https://cdn.jsdelivr.net/npm/';
   const path = `${module.moduleId}${module.version ? '@' + module.version : ''}/${module.path}`;
-  return new URL(path, nmBaseUrl).href;
+  return new URL(path, npmBaseUrl).href;
 };
 
 export const getRemotePackageJsonUrl = (sys: d.CompilerSystem, moduleId: string) => {

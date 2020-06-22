@@ -2,6 +2,7 @@ import { join } from 'path';
 import rollupCommonjs from '@rollup/plugin-commonjs';
 import rollupResolve from '@rollup/plugin-node-resolve';
 import { aliasPlugin } from './plugins/alias-plugin';
+import { replacePlugin } from './plugins/replace-plugin';
 import { relativePathPlugin } from './plugins/relative-path-plugin';
 import { BuildOptions } from '../utils/options';
 import { RollupOptions, OutputOptions } from 'rollup';
@@ -35,6 +36,7 @@ export async function cli(opts: BuildOptions) {
         preferBuiltins: true,
       }),
       rollupCommonjs(),
+      replacePlugin(opts),
       prettyMinifyPlugin(opts),
     ],
     treeshake: {

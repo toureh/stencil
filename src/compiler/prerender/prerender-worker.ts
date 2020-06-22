@@ -1,12 +1,10 @@
 import * as d from '../../declarations';
 import { addModulePreloads, excludeStaticComponents, minifyScriptElements, minifyStyleElements, removeModulePreloads, removeStencilScripts } from './prerender-optimize';
-import { catchError, normalizePath, isPromise, requireFunc, IS_NODE_ENV, IS_DENO_ENV, isRootPath } from '@utils';
+import { catchError, isPromise, isRootPath, normalizePath, requireFunc } from '@utils';
 import { crawlAnchorsForNextUrls } from './crawl-urls';
 import { getHydrateOptions } from './prerender-hydrate-options';
 import { getPrerenderConfig } from './prerender-config';
 import { patchNodeGlobal, patchWindowGlobal } from './prerender-global-patch';
-import { dirname } from 'path';
-import type { Deno as DenoType } from '../../../types/lib.deno';
 
 const prerenderCtx = {
   componentGraph: null as Map<string, string[]>,
@@ -15,7 +13,7 @@ const prerenderCtx = {
   templateHtml: null as string,
 };
 
-export const prerenderWorker = async (prerenderRequest: d.PrerenderUrlRequest) => {
+export const prerenderWorker = async (sys: d.CompilerSystem, prerenderRequest: d.PrerenderUrlRequest) => {
   // worker thread!
   const results: d.PrerenderUrlResults = {
     diagnostics: [],
@@ -25,14 +23,14 @@ export const prerenderWorker = async (prerenderRequest: d.PrerenderUrlRequest) =
 
   try {
     const url = new URL(prerenderRequest.url, prerenderRequest.devServerHostUrl);
-    const componentGraph = getComponentGraph(prerenderRequest.componentGraphPath);
+    const componentGraph = getComponentGraph(sys, prerenderRequest.componentGraphPath);
 
     // webpack work-around/hack
     const hydrateApp = requireFunc(prerenderRequest.hydrateAppFilePath);
 
     if (prerenderCtx.templateHtml == null) {
       // cache template html in this process
-      prerenderCtx.templateHtml = prerenderReadFileSync(prerenderRequest.templateId);
+      prerenderCtx.templateHtml = sys.readFileSync(prerenderRequest.templateId);
     }
 
     // create a new window by cloning the cached parsed window
@@ -138,7 +136,8 @@ export const prerenderWorker = async (prerenderRequest: d.PrerenderUrlRequest) =
       }
     }
 
-    await writePrerenderedHtml(results, html);
+    prerenderEnsureDir(sys, results.filePath);
+    await sys.writeFile(results.filePath, html);
 
     try {
       win.close();
@@ -151,43 +150,22 @@ export const prerenderWorker = async (prerenderRequest: d.PrerenderUrlRequest) =
   return results;
 };
 
-const getComponentGraph = (componentGraphPath: string) => {
+const getComponentGraph = (sys: d.CompilerSystem, componentGraphPath: string) => {
   if (componentGraphPath == null) {
     return undefined;
   }
   if (prerenderCtx.componentGraph == null) {
-    const componentGraphJson = JSON.parse(prerenderReadFileSync(componentGraphPath));
+    const componentGraphJson = JSON.parse(sys.readFileSync(componentGraphPath));
     prerenderCtx.componentGraph = new Map<string, string[]>(Object.entries(componentGraphJson));
   }
   return prerenderCtx.componentGraph;
 };
 
-const writePrerenderedHtml = async (results: d.PrerenderUrlResults, html: string) => {
-  prerenderEnsureDir(results.filePath);
-
-  if (IS_NODE_ENV) {
-    const fs: typeof import('fs') = requireFunc('fs');
-    await new Promise(resolve => {
-      fs.writeFile(results.filePath, html, (err: any) => {
-        if (err != null) {
-          results.filePath = null;
-          catchError(results.diagnostics, err);
-        }
-        resolve();
-      });
-    });
-  } else if (IS_DENO_ENV) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(html);
-    await Deno.writeFile(results.filePath, data);
-  }
-};
-
-const prerenderEnsureDir = (p: string) => {
+const prerenderEnsureDir = (sys: d.CompilerSystem, p: string) => {
   const allDirs: string[] = [];
 
   while (true) {
-    p = normalizePath(dirname(p));
+    p = normalizePath(sys.platformPath.dirname(p));
     if (typeof p === 'string' && p.length > 0 && !isRootPath(p)) {
       allDirs.push(p);
     } else {
@@ -201,33 +179,7 @@ const prerenderEnsureDir = (p: string) => {
     const dir = allDirs[i];
     if (!prerenderCtx.ensuredDirs.has(dir)) {
       prerenderCtx.ensuredDirs.add(dir);
-      prerenderMkDirSync(dir);
+      sys.mkdirSync(dir);
     }
   }
 };
-
-const prerenderReadFileSync = (p: string) => {
-  if (IS_NODE_ENV) {
-    const fs: typeof import('fs') = requireFunc('fs');
-    return fs.readFileSync(p, 'utf8');
-  }
-  if (IS_DENO_ENV) {
-    const decoder = new TextDecoder('utf-8');
-    const data = Deno.readFileSync(p);
-    return decoder.decode(data);
-  }
-  return null;
-};
-
-const prerenderMkDirSync = (dir: string) => {
-  try {
-    if (IS_NODE_ENV) {
-      const fs: typeof import('fs') = requireFunc('fs');
-      fs.mkdirSync(dir);
-    } else if (IS_DENO_ENV) {
-      Deno.mkdirSync(dir, { recursive: true });
-    }
-  } catch (e) {}
-};
-
-declare const Deno: typeof DenoType;

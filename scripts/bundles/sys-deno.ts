@@ -35,7 +35,6 @@ export async function sysDeno(opts: BuildOptions) {
       preferConst: true,
     },
     plugins: [
-      prettyMinifyPlugin(opts),
       {
         name: 'sysDenoWorkerAlias',
         resolveId(id) {
@@ -47,8 +46,22 @@ export async function sysDeno(opts: BuildOptions) {
           }
         },
       },
+      aliasPlugin(opts),
+      prettyMinifyPlugin(opts),
     ],
   };
 
-  return [sysDenoBundle, sysDenoWorkerBundle];
+  const inputNodeCompatFile = join(opts.transpiledDir, 'sys', 'deno', 'deno-node-compat.js');
+  const outputNodeCompatFile = join(opts.output.sysDenoDir, 'node-compat.js');
+  const sysDenoNodeCompatBundle: RollupOptions = {
+    input: inputNodeCompatFile,
+    output: {
+      format: 'esm',
+      file: outputNodeCompatFile,
+      preferConst: true,
+    },
+    plugins: [aliasPlugin(opts), denoStdPlugin(), prettyMinifyPlugin(opts)],
+  };
+
+  return [sysDenoBundle, sysDenoWorkerBundle, sysDenoNodeCompatBundle];
 }

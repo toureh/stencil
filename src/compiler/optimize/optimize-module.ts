@@ -1,4 +1,4 @@
-import { CompilerCtx, Config, Diagnostic, SourceTarget } from '../../declarations';
+import { CompilerCtx, CompilerSystem, Config, Diagnostic, SourceTarget } from '../../declarations';
 import { minfyJsId } from '../../version';
 import { transpileToEs5 } from '../transpile/transpile-to-es5';
 import { minifyJs } from './minify-js';
@@ -60,7 +60,7 @@ export const optimizeModule = async (config: Config, compilerCtx: CompilerCtx, o
   }
 
   const shouldTranspile = opts.sourceTarget === 'es5';
-  const results = await compilerCtx.worker.prepareModule(opts.input, minifyOpts, shouldTranspile, opts.inlineHelpers);
+  const results = await compilerCtx.worker.prepareModule(config.rootDir, opts.input, minifyOpts, shouldTranspile, opts.inlineHelpers);
   if (results != null && typeof results.output === 'string' && results.diagnostics.length === 0 && compilerCtx != null) {
     if (opts.isCore) {
       results.output = results.output.replace(/disconnectedCallback\(\)\{\},/g, '');
@@ -116,9 +116,9 @@ export const getTerserOptions = (config: Config, sourceTarget: SourceTarget, pre
   return opts;
 };
 
-export const prepareModule = async (input: string, minifyOpts: MinifyOptions, transpile: boolean, inlineHelpers: boolean) => {
+export const prepareModule = async (sys: CompilerSystem, rootDir: string, input: string, minifyOpts: MinifyOptions, transpile: boolean, inlineHelpers: boolean) => {
   if (transpile) {
-    const transpile = await transpileToEs5(input, inlineHelpers);
+    const transpile = await transpileToEs5(sys, rootDir, input, inlineHelpers);
     if (hasError(transpile.diagnostics)) {
       return {
         sourceMap: null,
