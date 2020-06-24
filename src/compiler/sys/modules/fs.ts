@@ -85,23 +85,19 @@ export const readFileSync = (fs.readFileSync = (p: string, opts: any) => {
 
 export const realpath = (fs.realpath = (p: string, opts: any, cb: (err: any, data: string) => void) => {
   cb = typeof cb === 'function' ? cb : typeof opts === 'function' ? opts : null;
-  fs.__sys.realpath(p).then(data => {
+  fs.__sys.realpath(p).then(results => {
     if (cb) {
-      if (typeof data === 'string') {
-        cb(null, data);
-      } else {
-        cb(new FsError('realpath', p), data);
-      }
+      cb(results.error, results.path);
     }
   });
 });
 
 export const realpathSync = (fs.realpathSync = (p: string) => {
-  const data = fs.__sys.realpathSync(p);
-  if (typeof data !== 'string') {
-    throw new FsError('realpathSync', p);
+  const results = fs.__sys.realpathSync(p);
+  if (results.error) {
+    throw results.error;
   }
-  return data;
+  return results.path;
 });
 
 export const statSync = (fs.statSync = (p: string) => {
