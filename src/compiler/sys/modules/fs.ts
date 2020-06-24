@@ -20,6 +20,8 @@ const fs: FsObj = {
 export const exists = (fs.exists = (p: string, cb: any) => {
   fs.__sys.access(p).then(hasAccess => {
     cb(hasAccess);
+  }).catch(() => {
+    cb(false);
   });
 });
 
@@ -42,6 +44,8 @@ export const mkdir = (fs.mkdir = (p: string, opts: any, cb: any) => {
         cb(null);
       }
     }
+  }).catch(e => {
+    cb && cb(e);
   });
 });
 
@@ -60,7 +64,7 @@ export const readdirSync = (fs.readdirSync = (p: string) => {
   return dirItems.map(dirItem => basename(dirItem));
 });
 
-export const readFile = (fs.readFile = async (p: string, opts: any, cb: (err: any, data: string) => void) => {
+export const readFile = (fs.readFile = async (p: string, opts: any, cb: (err: any, data?: string) => void) => {
   const encoding = typeof opts === 'object' ? opts.encoding : typeof opts === 'string' ? opts : 'utf-8';
   cb = typeof cb === 'function' ? cb : typeof opts === 'function' ? opts : null;
   fs.__sys.readFile(p, encoding).then(data => {
@@ -71,6 +75,8 @@ export const readFile = (fs.readFile = async (p: string, opts: any, cb: (err: an
         cb(new FsError('open', p), data);
       }
     }
+  }).catch(e => {
+    cb && cb(e);
   });
 });
 
@@ -83,12 +89,14 @@ export const readFileSync = (fs.readFileSync = (p: string, opts: any) => {
   return data;
 });
 
-export const realpath = (fs.realpath = (p: string, opts: any, cb: (err: any, data: string) => void) => {
+export const realpath = (fs.realpath = (p: string, opts: any, cb: (err: any, data?: string) => void) => {
   cb = typeof cb === 'function' ? cb : typeof opts === 'function' ? opts : null;
   fs.__sys.realpath(p).then(results => {
     if (cb) {
       cb(results.error, results.path);
     }
+  }).catch(e => {
+    cb(e);
   });
 });
 
@@ -120,6 +128,8 @@ export const stat = (fs.stat = (p: string, opts: any, cb: any) => {
         cb(new FsError('stat', p));
       }
     }
+  }).catch(e => {
+    cb && cb(e);
   });
 });
 
@@ -137,6 +147,8 @@ export const writeFile = (fs.writeFile = (p: string, data: string, opts: any, cb
         cb(null);
       }
     }
+  }).catch(e => {
+    cb && cb(e);
   });
 });
 

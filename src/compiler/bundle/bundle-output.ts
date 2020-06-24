@@ -12,7 +12,7 @@ import { lazyComponentPlugin } from '../output-targets/dist-lazy/lazy-component-
 import { loaderPlugin } from './loader-plugin';
 import { pluginHelper } from './plugin-helper';
 import { resolveIdWithTypeScript, typescriptPlugin } from './typescript-plugin';
-import { rollupCommonjsPlugin, rollupJsonPlugin, rollupNodeResolvePlugin, rollupReplacePlugin } from '@compiler-plugins';
+import { rollupCommonjsPlugin, rollupJsonPlugin, rollupNodeResolvePlugin, rollupReplacePlugin } from '@compiler-deps';
 import { RollupOptions, TreeshakingOptions, rollup } from 'rollup';
 import { userIndexPlugin } from './user-index-plugin';
 import { workerPlugin } from './worker-plugin';
