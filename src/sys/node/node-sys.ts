@@ -1,4 +1,4 @@
-import { CompilerSystem, Logger, SystemDetails, CompilerSystemUnlinkResults, CompilerSystemMakeDirectoryResults, CompilerSystemWriteFileResults } from '../../declarations';
+import type { CompilerSystem, CompilerSystemMakeDirectoryResults, CompilerSystemRealpathResults, CompilerSystemUnlinkResults, CompilerSystemWriteFileResults, Logger, SystemDetails } from '../../declarations';
 import { asyncGlob, nodeCopyTasks } from './node-copy-tasks';
 import { cpus, freemem, platform, release, tmpdir, totalmem } from 'os';
 import { createHash } from 'crypto';
@@ -205,16 +205,25 @@ export function createNodeSys(c: { process: any; logger: Logger }) {
     },
     realpath(p) {
       return new Promise(resolve => {
-        fs.realpath(p, 'utf8', (_, data) => {
-          resolve(data);
+        fs.realpath(p, 'utf8', (e, data) => {
+          resolve({
+            path: data,
+            error: e
+          });
         });
       });
     },
     realpathSync(p) {
+      const results: CompilerSystemRealpathResults = {
+        path: undefined,
+        error: null
+      }
       try {
-        return fs.realpathSync(p, 'utf8');
-      } catch (e) {}
-      return undefined;
+        results.path = fs.realpathSync(p, 'utf8');
+      } catch (e) {
+        results.error = e;
+      }
+      return results;
     },
     rename(oldPath, newPath) {
       return new Promise(resolve => {

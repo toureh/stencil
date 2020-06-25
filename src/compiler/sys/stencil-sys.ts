@@ -1,17 +1,18 @@
 import {
+  CompilerDependency,
   CompilerFileWatcherCallback,
-  CompilerSystemRemoveDirectoryOptions,
   CompilerFsStats,
   CompilerSystem,
   CompilerSystemMakeDirectoryOptions,
   CompilerSystemMakeDirectoryResults,
-  CopyResults,
-  CopyTask,
+  CompilerSystemRealpathResults,
+  CompilerSystemRemoveDirectoryOptions,
   CompilerSystemRemoveDirectoryResults,
-  CompilerSystemWriteFileResults,
   CompilerSystemRenameResults,
   CompilerSystemUnlinkResults,
-  CompilerDependency,
+  CompilerSystemWriteFileResults,
+  CopyResults,
+  CopyTask,
 } from '../../declarations';
 import platformPath from 'path-browserify';
 import { buildEvents } from '../events';
@@ -216,7 +217,13 @@ export const createSystem = () => {
 
   const readFile = async (p: string) => readFileSync(p);
 
-  const realpathSync = (p: string) => normalize(p);
+  const realpathSync = (p: string) => {
+    const results: CompilerSystemRealpathResults = {
+      path: normalize(p),
+      error: null
+    }
+    return results;
+  }
 
   const realpath = async (p: string) => realpathSync(p);
 

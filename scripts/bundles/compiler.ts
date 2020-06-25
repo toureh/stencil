@@ -5,7 +5,7 @@ import rollupJson from '@rollup/plugin-json';
 import rollupNodeResolve from '@rollup/plugin-node-resolve';
 import { aliasPlugin } from './plugins/alias-plugin';
 import { getBanner } from '../utils/banner';
-import { inlinedCompilerPluginsPlugin } from './plugins/inlined-compiler-plugins-plugin';
+import { inlinedCompilerDepsPlugin } from './plugins/inlined-compiler-deps-plugin';
 import { moduleDebugPlugin } from './plugins/module-debug-plugin';
 import { parse5Plugin } from './plugins/parse5-plugin';
 import { replacePlugin } from './plugins/replace-plugin';
@@ -85,7 +85,7 @@ export async function compiler(opts: BuildOptions) {
           return code;
         }
       },
-      inlinedCompilerPluginsPlugin(opts, inputDir),
+      inlinedCompilerDepsPlugin(opts, inputDir),
       parse5Plugin(opts),
       sizzlePlugin(opts),
       aliasPlugin(opts),
