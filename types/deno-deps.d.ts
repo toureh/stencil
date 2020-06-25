@@ -6,6 +6,7 @@ declare module 'https://deno.land/std/fs/mod.ts' {
     isSymlink: boolean;
     path: string;
   }
+  export function ensureDirSync(dir: string): Promise<void>;
   export function expandGlob(
     glob: string,
     opts?: {

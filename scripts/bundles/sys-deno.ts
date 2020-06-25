@@ -60,7 +60,25 @@ export async function sysDeno(opts: BuildOptions) {
       file: outputNodeCompatFile,
       preferConst: true,
     },
-    plugins: [aliasPlugin(opts), denoStdPlugin(), prettyMinifyPlugin(opts)],
+    plugins: [
+      {
+        name: 'denoNodeCompatPlugin',
+        resolveId(importee) {
+          if (importee.endsWith('process.ts')) {
+            return join(opts.transpiledDir, 'sys', 'deno', 'deno-node-process.js');
+          }
+          return null;
+        },
+      },
+      aliasPlugin(opts),
+      denoStdPlugin(),
+      prettyMinifyPlugin(opts),
+    ],
+    treeshake: {
+      moduleSideEffects: false,
+      propertyReadSideEffects: false,
+      unknownGlobalSideEffects: false,
+    },
   };
 
   return [sysDenoBundle, sysDenoWorkerBundle, sysDenoNodeCompatBundle];

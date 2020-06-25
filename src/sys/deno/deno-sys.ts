@@ -1,15 +1,16 @@
 import type {
-  CompilerSystem,
   CompilerFsStats,
-  CompilerSystemRenameResults,
-  CompilerSystemRemoveDirectoryResults,
-  CompilerSystemUnlinkResults,
+  CompilerSystem,
   CompilerSystemMakeDirectoryResults,
+  CompilerSystemRealpathResults,
+  CompilerSystemRemoveDirectoryResults,
+  CompilerSystemRenameResults,
+  CompilerSystemUnlinkResults,
   CompilerSystemWriteFileResults,
   Logger,
   PackageJsonData,
 } from '../../declarations';
-import { basename, delimiter, dirname, extname, isAbsolute, join, normalize, parse, relative, resolve, sep, win32, posix } from './deps';
+import { basename, delimiter, dirname, ensureDirSync, extname, isAbsolute, join, normalize, parse, relative, resolve, sep, win32, posix } from './deps';
 import { createDenoWorkerMainController } from './deno-worker-main';
 import { denoCopyTasks } from './deno-copy-tasks';
 import { normalizePath, noop } from '@utils';
@@ -38,6 +39,8 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
     try {
       const rsp = await fetch(opts.url);
       if (rsp.ok) {
+        ensureDirSync(dirname(opts.filePath));
+
         const content = await rsp.clone().text();
         const encoder = new TextEncoder();
         await deno.writeFile(opts.filePath, encoder.encode(content));
@@ -302,16 +305,28 @@ export function createDenoSys(c: { Deno: any; logger: Logger }) {
       return undefined;
     },
     async realpath(p) {
+      const results: CompilerSystemRealpathResults = {
+        error: null,
+        path: undefined,
+      }
       try {
-        return await deno.realPath(p);
-      } catch (e) {}
-      return undefined;
+        results.path = await deno.realPath(p);
+      } catch (e) {
+        results.error = e;
+      }
+      return results;
     },
     realpathSync(p) {
+      const results: CompilerSystemRealpathResults = {
+        error: null,
+        path: undefined,
+      }
       try {
-        return deno.realPathSync(p);
-      } catch (e) {}
-      return undefined;
+        results.path = deno.realPathSync(p);
+      } catch (e) {
+        results.error = e;
+      }
+      return results;
     },
     async rename(oldPath, newPath) {
       const results: CompilerSystemRenameResults = {

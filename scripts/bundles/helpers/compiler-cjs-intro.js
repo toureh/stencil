@@ -27,9 +27,6 @@ if (typeof globalThis === 'undefined') {
   if (!process.chdir) {
     process.chdir = (v) => cwd = v;
   }
-  if (!process.env) {
-    process.env = {};
-  }
   if (!process.nextTick) {
     const resolved = Promise.resolve();
     process.nextTick = (cb) => resolved.then(cb);
@@ -39,11 +36,5 @@ if (typeof globalThis === 'undefined') {
   }
   if (!process.version) {
     process.version = 'v12.0.0';
-  }
-  if (!gbl.__dirname) {
-    gbl.__dirname = '/';
-  }
-  if (!gbl.__filename) {
-    gbl.__filename = '/stencil.js';
   }
 })(globalThis);

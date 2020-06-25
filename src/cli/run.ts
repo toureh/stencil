@@ -18,6 +18,9 @@ export async function run(init: CliInitOptions) {
 
   try {
     const flags = parseFlags(sys, args);
+    if (flags.debug) {
+      logger.setLevel('debug');
+    }
 
     if (flags.ci) {
       logger.enableColors(false);
