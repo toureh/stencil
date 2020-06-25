@@ -1,4 +1,4 @@
-// deno install -n stencil --allow-read --allow-write --allow-net ./bin/cli.ts
+// deno install -n stencil --allow-read --allow-write --allow-net --unstable -f ./bin/cli.ts
 import { run } from '../cli/index.js';
 import { createDenoLogger, createDenoSys } from '../sys/deno/index.js';
 

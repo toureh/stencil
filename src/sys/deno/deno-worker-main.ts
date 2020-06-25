@@ -45,9 +45,11 @@ export const createDenoWorkerMainController = (_deno: typeof DenoTypes, sys: d.C
 
   const createWorkerMain = () => {
     const workerUrl = new URL('./worker.js', import.meta.url).href;
-    const workerOpts: WorkerOptions = {
+    const workerOpts: any = {
       name: `stencil.worker.${workerIds++}`,
       type: `module`,
+      // https://github.com/denoland/deno/pull/4784/files#diff-dd54e4bec687ba9ed5ee965039de9fbbR1083
+      deno: true
     };
 
     const worker = new Worker(workerUrl, workerOpts);
